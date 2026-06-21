@@ -1,0 +1,20 @@
+node_modules/
+meridian/node_modules/
+meridian/dist/
+meridian/.vite/
+
+meridian/public/music/*
+!meridian/public/music/.gitkeep
+
+.env
+.env.*
+*.log
+
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Per-machine AI tooling config (not shared)
+.claude/
+.agents/
+.codex/

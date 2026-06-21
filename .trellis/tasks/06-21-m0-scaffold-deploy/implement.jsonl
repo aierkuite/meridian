@@ -1,0 +1,6 @@
+{"_example": "Fill with {\"file\": \"<path>\", \"reason\": \"<why>\"}. Put spec/research files only — no code paths. Run `python .trellis/scripts/get_context.py --mode packages` to list available specs. Delete this line once real entries are added."}
+{"file": ".trellis/spec/project/determinism-and-testing.md", "reason": "Sim spine: fixed step; update() pure (no wall-clock/Math.random), render-free"}
+{"file": ".trellis/spec/engine/core-loop-and-input.md", "reason": "loop.ts/input.ts/main.ts contract; input sampled once per fixed step; main.ts wiring-only"}
+{"file": ".trellis/spec/project/directory-structure.md", "reason": "src/ tree mirrors plan.md §10; simulation↔presentation boundary"}
+{"file": ".trellis/spec/project/typescript-conventions.md", "reason": "strict TS; core types; no any"}
+{"file": ".trellis/spec/project/error-handling-and-perf.md", "reason": "clampFrameDelta / spiral-of-death guard; 60fps budget mindset"}
