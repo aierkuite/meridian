@@ -4,7 +4,7 @@ Meridian is an open-source browser dual-pole puzzle-platformer about two mirrore
 
 ## Live Demo
 
-GitHub Pages: https://<user>.github.io/meridian/
+GitHub Pages: https://aierkuite.github.io/meridian/
 
 ## Development
 

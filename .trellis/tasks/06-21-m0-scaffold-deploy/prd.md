@@ -58,15 +58,24 @@ depends on — from the first commit, before any sim code exists.
 
 ## Acceptance Criteria (M0 hard gate — plan §11)
 
-- [ ] AC1 `npm install` then `npm run dev` serves a page showing the horizon
+- [x] AC1 `npm install` then `npm run dev` serves a page showing the horizon
       seam + a marker animated by the fixed-step loop (verified locally).
-- [ ] AC2 `npm run build` succeeds and `npm run typecheck` passes under strict TS.
-- [ ] AC3 `npm run check:determinism` reports **no** `Math.random` / `Date.now`
+- [x] AC2 `npm run build` succeeds and `npm run typecheck` passes under strict TS.
+- [x] AC3 `npm run check:determinism` reports **no** `Math.random` / `Date.now`
       / `new Date` / `performance.now` under `src/engine/` or `src/game/`.
-- [ ] AC4 Code is pushed to **`main`** on the public GitHub repo `meridian`.
-- [ ] AC5 The GitHub Actions deploy workflow run is **green**.
-- [ ] AC6 **The GitHub Pages URL `https://<user>.github.io/meridian/` is
-      reachable** and renders the running placeholder loop. ← defining gate of M0.
+- [x] AC4 Code is pushed to **`main`** on the public GitHub repo `meridian`
+      (`https://github.com/aierkuite/meridian`).
+- [x] AC5 The GitHub Actions deploy workflow run is **green**. Run #1 failed at
+      `configure-pages` (repo was private at push time → Pages unavailable);
+      after flipping public + enabling Pages source = GitHub Actions, run #2's
+      build (`npm ci` / `check:determinism` / `build` all success) + deploy
+      succeeded — proven by AC6 (the only way Pages serves this content).
+      *(Direct run-conclusion read was blocked by GitHub API rate limit on the
+      proxy exit IP; Pages-live evidence is conclusive.)*
+- [x] AC6 **The GitHub Pages URL `https://aierkuite.github.io/meridian/` is
+      reachable** (HTTP 200, `<title>Meridian</title>`) and serves the built
+      bundle at the correct base path (`/meridian/assets/index-BKHen-Jg.js` →
+      200), so the placeholder loop runs client-side. ← defining gate of M0. ✅
 
 ## Definition of Done
 - All acceptance criteria checked.
