@@ -1,8 +1,12 @@
 # TypeScript Conventions
 
-> **Status: Plan-derived (pre-implementation).** Source: `plan.md` §3, §10.
-> Signatures below are illustrative of the prescribed model; reconcile with real
-> code after M0/M1.
+> **Status: Partially reconciled with M0 (2026-06-22).** `tsconfig.json` is the
+> full strict suite (`strict`, `noUncheckedIndexedAccess`,
+> `exactOptionalPropertyTypes`, `verbatimModuleSyntax`, `isolatedModules`,
+> `noEmit`, `moduleResolution: bundler`, ES2022+DOM); `tsc --noEmit` is a CI
+> gate. `engine/math.ts` ships `Vec2` + `clamp`/`vec2` exactly as below. The
+> element/ending/consequence unions (§discriminated unions, element contract,
+> `Consequence`) remain illustrative — they land in M1+ (`game/`).
 
 ---
 

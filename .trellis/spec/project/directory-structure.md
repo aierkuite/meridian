@@ -3,8 +3,12 @@
 > How Meridian's code is organized, and the one boundary that matters most:
 > **simulation vs. presentation.**
 
-> **Status: Plan-derived (pre-implementation).** Source: `plan.md` §10. The tree
-> below is *prescribed*, not yet created. Reconcile after M0/M1.
+> **Status: Reconciled with M0 (2026-06-22).** The full `src/` tree below now
+> exists under `meridian/` (app in a subdir; git root holds `plan.md` +
+> `.trellis/`). Spine implemented: `engine/loop.ts`, `input.ts`, `math.ts`,
+> `main.ts`. Every other layer (`game/ render/ audio/ data/ ui/ dev/`) and
+> `engine/{physics,camera}.ts` exist as `index.ts`/`.gitkeep` stubs carrying an
+> "M0 placeholder" banner — navigable but empty. They fill in M1+.
 
 ---
 

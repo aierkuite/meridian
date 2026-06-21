@@ -4,8 +4,14 @@
 > is provably beatable, no softlocks" — rests on the simulation being
 > deterministic. Read this before touching anything under `engine/` or `game/`.
 
-> **Status: Plan-derived (pre-implementation).** Source: `plan.md` §3.4, §10,
-> §13, M2/M6. Reconcile after the harness exists.
+> **Status: Partially reconciled with M0 (2026-06-22).** The fixed-timestep
+> loop (§1) and the determinism guard shipped: `engine/loop.ts` advances fixed
+> `DT=1/120` steps with a clamped accumulator, and `meridian/scripts/check-determinism.mjs`
+> (run as `npm run check:determinism`, in CI) greps `src/engine`+`src/game` for
+> `Math.random` / `Date.now` / `new Date` / `performance.now`. **Still future
+> (M2):** §4's `dev/replay.ts` solvability harness + `solutionPath` — the
+> "tested" bar (§5) only activates once that harness exists. Until then M0's
+> gate is typecheck + build + the determinism guard.
 
 ---
 

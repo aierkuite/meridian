@@ -2,8 +2,12 @@
 
 > `src/main.ts`, `src/engine/loop.ts`, `src/engine/input.ts`, `src/engine/camera.ts`.
 
-> **Status: Plan-derived (pre-implementation).** Source: `plan.md` §10. Shapes
-> are illustrative. Reconcile after M0/M1.
+> **Status: Reconciled with M0 (2026-06-22).** `src/engine/loop.ts`,
+> `input.ts`, `math.ts` and `src/main.ts` landed. The shapes below match the
+> shipped code; one refinement — the loop is exposed as
+> `startFixedLoop({ sampleInput, update, render }): () => void` returning a
+> disposer (for HMR teardown), rather than a bare `frame()` closure. Camera
+> (`engine/camera.ts`) remains a stub until M1/M2.
 
 ---
 
