@@ -4,6 +4,8 @@ export interface InputSnapshot {
   readonly moveX: Axis;
   readonly jump: boolean;
   readonly sunDelta: Axis;
+  readonly restart: boolean;
+  readonly pause: boolean;
 }
 
 export interface KeyboardInput {
@@ -52,6 +54,8 @@ function createInputSnapshot(pressedCodes: ReadonlySet<string>): InputSnapshot {
     ),
     jump: pressedCodes.has("Space"),
     sunDelta: axisFromKeys(pressedCodes.has("ArrowDown"), pressedCodes.has("ArrowUp")),
+    restart: pressedCodes.has("KeyR"),
+    pause: pressedCodes.has("Escape"),
   });
 }
 

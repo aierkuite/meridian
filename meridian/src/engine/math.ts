@@ -3,6 +3,13 @@ export interface Vec2 {
   readonly y: number;
 }
 
+export interface AABB {
+  readonly x: number;
+  readonly y: number;
+  readonly w: number;
+  readonly h: number;
+}
+
 /**
  * 创建一个不可变二维向量
  *
@@ -24,4 +31,8 @@ export function vec2(x: number, y: number): Vec2 {
  */
 export function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
+}
+
+export function aabbOverlap(a: AABB, b: AABB): boolean {
+  return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
 }
