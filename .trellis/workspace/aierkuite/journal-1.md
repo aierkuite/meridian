@@ -40,3 +40,36 @@ Stood up Meridian M0: Vite+TS strict scaffold in meridian/ subdir (git root hold
 ### Next Steps
 
 - None - task complete
+
+
+## Session 2: M1 vertical slice — dual-world proof shipped
+
+**Date**: 2026-06-22
+**Task**: M1 vertical slice — dual-world proof shipped
+**Branch**: `main`
+
+### Summary
+
+Planned M1 via /trellis-brainstorm (4 decisions locked: scope boundary, win-flow=transition+reset, audio=procedural+sawtooth filter, ice puzzle=symmetric double-bridge). Implemented the full slice in one pass: deterministic sim core (sun/player/physics/ice/segment) + silhouette+glow renderer (offscreen sprites, no shadowBlur) + Web Audio drone with sun-tracking lowpass+reverb + win/reset/pause. Playtest iterated three presentation fixes (sine→sawtooth so the filter is audible; sun orb travels between worlds; s-driven sky crossfade with day∝s/night∝1-s) and one mechanic change (ice flipped to per-world inverted polarity — sun warms its world; supersedes plan §4 elem 1, recorded in elements.md). All gates green; committed 62289e8 and pushed to main (Pages deploying).
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `62289e8` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
