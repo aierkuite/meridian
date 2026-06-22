@@ -8,7 +8,7 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 2
+- **Total Sessions**: 3
 - **Last Active**: 2026-06-22
 <!-- @@@/auto:current-status -->
 
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~75 | Active |
+| `journal-1.md` | ~109 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 3 | 2026-06-22 | M2 Core Hardening Finish | `f459f2f`, `ae9b2db` | `main` |
 | 2 | 2026-06-22 | M1 vertical slice — dual-world proof shipped | `62289e8` | `main` |
 | 1 | 2026-06-22 | M0 milestone — scaffold + fixed-step loop + Pages deploy live | `2d99b16`, `29c7687`, `780d3bb` | `main` |
 <!-- @@@/auto:session-history -->

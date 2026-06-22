@@ -73,3 +73,37 @@ Planned M1 via /trellis-brainstorm (4 decisions locked: scope boundary, win-flow
 ### Next Steps
 
 - None - task complete
+
+
+## Session 3: M2 Core Hardening Finish
+
+**Date**: 2026-06-22
+**Task**: M2 Core Hardening Finish
+**Branch**: `main`
+
+### Summary
+
+Finished M2 Core Hardening Phase 3: reconciled M1/M2 specs, committed solution-path replay harness with player feel, committed journey camera transition with dev overlay, and verified typecheck/determinism/replay/build.
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `f459f2f` | (see git log) |
+| `ae9b2db` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
