@@ -1,19 +1,20 @@
 import { createKeyboardInput, type InputSnapshot } from "./engine/input";
 import { startFixedLoop } from "./engine/loop";
 import { clamp } from "./engine/math";
-import { resetSegment, createSegment, updateSegment, type SegmentState } from "./game/segment";
+import { createJourney, updateJourney, type JourneyState } from "./game/journey";
 import m1Slice from "./data/segments/m1-slice";
 import { createRenderer, renderScene, type Renderer } from "./render/renderer";
 import { createAudio, type AudioEngine } from "./audio/audio";
-import { drawPauseOverlay, drawWinCard } from "./ui/hud";
+import { drawPauseOverlay } from "./ui/hud";
+// 静态 import：生产构建中 Vite 会把 `import.meta.env.DEV` 折叠为 false，
+// 进而把本模块整条 import 与 `drawDebugOverlay` 的调用一并 tree-shake。
+import { drawDebugOverlay } from "./dev/debugOverlay";
 
 interface CanvasSize {
   width: number;
   height: number;
   dpr: number;
 }
-
-const WIN_HOLD_SECONDS = 1.8;
 
 const app = document.querySelector<HTMLDivElement>("#app");
 
@@ -36,15 +37,41 @@ const context = getRequiredCanvasContext(canvas);
 app.replaceChildren(canvas);
 
 const input = createKeyboardInput(window);
-const segment: SegmentState = createSegment(m1Slice);
+const journey: JourneyState = createJourney([m1Slice]);
 const renderer: Renderer = createRenderer();
 const audio: AudioEngine = createAudio();
 
+// 调试覆盖层开关：仅在 DEV 构建中追踪 Backquote 边沿。`prevDebugKey` 与
+// `debugOverlayEnabled` 即使在生产中保留也只是死代码，会在 Vite 的
+// minifier 阶段连同 `import.meta.env.DEV === false` 分支一起被剔除。
+// 选 `Backquote`：design.md §6 推荐，避开所有 gameplay 按键。
+const DEBUG_TOGGLE_CODE = "Backquote";
+let debugOverlayEnabled = false;
+let prevDebugKey = false;
+let debugKeyDown = false;
+
+// 调试切换键状态：独立于 gameplay input 采样器，避免污染 `InputSnapshot`
+// （后者被 replay harness 直接消费）。仅在 DEV 构建中启用监听。
+const handleDebugKeyDown = (event: KeyboardEvent): void => {
+  if (event.code === DEBUG_TOGGLE_CODE) {
+    debugKeyDown = true;
+  }
+};
+const handleDebugKeyUp = (event: KeyboardEvent): void => {
+  if (event.code === DEBUG_TOGGLE_CODE) {
+    debugKeyDown = false;
+  }
+};
+if (import.meta.env.DEV) {
+  window.addEventListener("keydown", handleDebugKeyDown);
+  window.addEventListener("keyup", handleDebugKeyUp);
+}
+
 const canvasSize: CanvasSize = { width: 0, height: 0, dpr: 1 };
-let wonTimer = 0;
 let paused = false;
-let prevRestart = false;
 let prevPause = false;
+// 上一帧 restart 标志：同时供 main 自身与 updateJourney 复算边沿
+let prevRestart = false;
 
 function createGameCanvas(): HTMLCanvasElement {
   const nextCanvas = document.createElement("canvas");
@@ -81,35 +108,31 @@ function resizeCanvasToDisplaySize(targetCanvas: HTMLCanvasElement, size: Canvas
 }
 
 function update(dt: number, snapshot: InputSnapshot): void {
-  const restartEdge = snapshot.restart && !prevRestart;
   const pauseEdge = snapshot.pause && !prevPause;
-  prevRestart = snapshot.restart;
   prevPause = snapshot.pause;
-
-  if (segment.status === "won") {
-    wonTimer += dt;
-    if (wonTimer >= WIN_HOLD_SECONDS) {
-      resetSegment(segment);
-      wonTimer = 0;
-    }
-    return;
-  }
-
-  if (restartEdge) {
-    resetSegment(segment);
-    wonTimer = 0;
-    return;
-  }
 
   if (pauseEdge) {
     paused = !paused;
   }
 
+  // 调试覆盖层切换边沿：独立于 gameplay，暂停期间也可切换；DEV 构建外为死分支
+  if (import.meta.env.DEV) {
+    const debugEdge = debugKeyDown && !prevDebugKey;
+    prevDebugKey = debugKeyDown;
+    if (debugEdge) {
+      debugOverlayEnabled = !debugOverlayEnabled;
+    }
+  }
+
   if (paused) {
+    // 暂停期间不更新 prevRestart，确保恢复后第一次 restart 仍按边沿触发
     return;
   }
 
-  updateSegment(segment, snapshot, dt);
+  // updateJourney 内部会按 snapshot.restart && !prevRestart 复算边沿；
+  // 把本帧前的 prevRestart 传进去，再更新它
+  updateJourney(journey, snapshot, dt, prevRestart);
+  prevRestart = snapshot.restart;
 }
 
 function render(_alpha: number): void {
@@ -121,16 +144,20 @@ function render(_alpha: number): void {
   context.fillStyle = "#05070f";
   context.fillRect(0, 0, width, height);
 
-  renderScene(context, segment, renderer, { width, height, dpr });
+  renderScene(context, journey.active, journey.camera, renderer, { width, height, dpr });
 
-  if (segment.status === "won") {
-    drawWinCard(context, width, height, Math.min(1, wonTimer * 4));
-  }
   if (paused) {
     drawPauseOverlay(context, width, height);
   }
 
-  audio.update(segment.sun.value);
+  // 调试覆盖层在主场景与暂停层之上绘制；`drawDebugOverlay` 内部会自行
+  // 设置场景变换（含相机偏移）与屏幕坐标变换。
+  // 生产构建中 `import.meta.env.DEV` 为 false，整块会被 Vite tree-shake。
+  if (import.meta.env.DEV && debugOverlayEnabled) {
+    drawDebugOverlay(context, journey, journey.camera, { width, height, dpr });
+  }
+
+  audio.update(journey.active.sun.value);
 }
 
 function unlockAudioOnce(): void {
@@ -150,5 +177,9 @@ if (import.meta.hot) {
     stopLoop();
     input.dispose();
     window.removeEventListener("keydown", unlockAudioOnce);
+    if (import.meta.env.DEV) {
+      window.removeEventListener("keydown", handleDebugKeyDown);
+      window.removeEventListener("keyup", handleDebugKeyUp);
+    }
   });
 }

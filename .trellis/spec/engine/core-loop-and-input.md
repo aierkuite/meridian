@@ -2,12 +2,11 @@
 
 > `src/main.ts`, `src/engine/loop.ts`, `src/engine/input.ts`, `src/engine/camera.ts`.
 
-> **Status: Reconciled with M0 (2026-06-22).** `src/engine/loop.ts`,
-> `input.ts`, `math.ts` and `src/main.ts` landed. The shapes below match the
-> shipped code; one refinement — the loop is exposed as
-> `startFixedLoop({ sampleInput, update, render }): () => void` returning a
-> disposer (for HMR teardown), rather than a bare `frame()` closure. Camera
-> (`engine/camera.ts`) remains a stub until M1/M2.
+> **Status: Reconcile after M1/M2 (2026-06-22).** `src/engine/loop.ts`,
+> `input.ts`, `math.ts`, `camera.ts`, and `src/main.ts` have landed. The loop is
+> exposed as `startFixedLoop({ sampleInput, update, render }): () => void`
+> returning a disposer for HMR teardown. M2 added deterministic camera
+> transition state and journey wiring.
 
 ---
 
@@ -57,18 +56,38 @@ function frame(now: number) {
 ```ts
 type InputSnapshot = {
   readonly moveX: -1 | 0 | 1;
-  readonly jump: boolean;       // edge-detected for buffering
+  readonly jump: boolean;       // player-held jump; player.ts edge-detects for buffering
   readonly sunDelta: -1 | 0 | 1; // ↑ / ↓
+  readonly restart: boolean;
+  readonly pause: boolean;
 };
 ```
 
 ## Camera (`engine/camera.ts`)
 
-- **Seamless scroll** between segments — no "level complete" UI, no level select
-  (plan §3.4, §5). The camera smoothly advances when both avatars clear their
-  exits.
-- The camera is part of simulation-adjacent state but only ever **reads**
-  world/player position; it never alters gameplay.
+- **Presentation transform only.** Camera offset is a render concern: gameplay
+  collision, exits, terrain, and elements always stay in segment-local
+  coordinates. `render/renderer.ts` and `dev/debugOverlay.ts` apply
+  `camera.x` as a drawing transform; `game/segment.ts` never sees world-space
+  offsets.
+- **Deterministic transition state.** `CameraState` is
+  `{ x, targetX, transitionFramesRemaining }`; `stepCamera()` advances by fixed
+  frame counters and never reads wall-clock time.
+- **Journey owns transition bookkeeping.** `game/journey.ts` may start/step the
+  camera after `SegmentState.status === "won"`, but it must not read canvas,
+  DOM, audio, or renderer state to decide gameplay. In the M2 single-segment
+  fixture, the loop-back transition uses `targetX=0`; that is allowed as
+  infrastructure, not final polish.
+- **No hard completion screen.** Seamless scroll/transition replaces the M1 win
+  card as progression (plan §3.4, §5).
+
+```ts
+interface CameraState {
+  x: number;
+  targetX: number;
+  transitionFramesRemaining: number;
+}
+```
 
 ---
 
@@ -77,3 +96,4 @@ type InputSnapshot = {
 - ❌ Variable-`dt` physics (breaks determinism + the replay harness).
 - ❌ Reading input per render frame instead of per fixed step.
 - ❌ Putting game rules in `main.ts` or the loop — they belong in `game/`.
+- ❌ Feeding camera/world offsets into collision or segment data.

@@ -3,12 +3,10 @@
 > How Meridian's code is organized, and the one boundary that matters most:
 > **simulation vs. presentation.**
 
-> **Status: Reconciled with M0 (2026-06-22).** The full `src/` tree below now
-> exists under `meridian/` (app in a subdir; git root holds `plan.md` +
-> `.trellis/`). Spine implemented: `engine/loop.ts`, `input.ts`, `math.ts`,
-> `main.ts`. Every other layer (`game/ render/ audio/ data/ ui/ dev/`) and
-> `engine/{physics,camera}.ts` exist as `index.ts`/`.gitkeep` stubs carrying an
-> "M0 placeholder" banner — navigable but empty. They fill in M1+.
+> **Status: Reconcile after M1/M2 (2026-06-22).** The app lives under
+> `meridian/`; M1/M2 filled the gameplay, render, data, UI, and dev tooling
+> spine. `dev/replay.ts` is the headless simulation gate, while
+> `dev/debugOverlay.ts` is a dev-only visual diagnostic overlay.
 
 ---
 
@@ -79,6 +77,25 @@ arrow only points presentation → simulation, never the reverse.
 
 > Maps onto the spec layers: `engine` layer = `src/engine/` + `src/game/`;
 > `render`/`audio`/`ui`/`data` layers = the matching `src/` dirs.
+
+## Dev tooling boundary
+
+Development helpers may visualize or replay simulation state, but they must not
+change the gameplay contract:
+
+- `src/dev/replay.ts` imports simulation (`engine/`, `game/`) and data only. It
+  must not import `render/`, `audio/`, `ui/`, canvas, DOM, or debug overlay code.
+- `src/dev/debugOverlay.ts` is visual-only and read-only. It may read
+  `JourneyState`, `SegmentState`, and `CameraState`, then draw diagnostics after
+  the main renderer.
+- The debug overlay toggle is `Backquote` and is tracked in `main.ts`, outside
+  `InputSnapshot`. `InputSnapshot` is consumed directly by replay, so debug
+  commands must not be added to it.
+- The overlay is guarded by `import.meta.env.DEV`; production builds should
+  tree-shake the call path. Do not rely on runtime-only flags for shipping
+  builds.
+- Rendering hot paths, including debug overlay diagnostics, must not use
+  `shadowBlur`.
 
 ---
 

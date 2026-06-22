@@ -6,8 +6,9 @@
 > narration logic). Everything here must obey
 > [Determinism & Testing](../project/determinism-and-testing.md).
 
-> **Status: Plan-derived (pre-implementation).** Source: `plan.md` §3, §10.
-> Signatures are illustrative of the prescribed model. Reconcile after M1.
+> **Status: Reconcile after M1/M2 (2026-06-22).** M1/M2 landed the fixed loop,
+> input, physics, segment runtime, journey transition, and camera state. M3/M4
+> element, consequence, narration, and ending specs remain future where noted.
 
 ---
 

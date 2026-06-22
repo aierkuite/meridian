@@ -5,11 +5,9 @@
 > framework). Layer-specific rules live in `engine/`, `render/`, `audio/`,
 > `data/`, `ui/`.
 
-> **Status: Plan-derived (pre-implementation).** No `src/` exists yet. These
-> conventions are extracted from `plan.md` — the single source of truth (esp.
-> §3 mechanics, §10 architecture). Examples cite the file paths and signatures
-> *prescribed* by the plan, not code that exists today. **Reconcile with the
-> real code once M0/M1 land**, then delete this banner.
+> **Status: Reconcile after M1/M2 (2026-06-22).** The app now lives under
+> `meridian/` with M1/M2 gameplay, replay, debug, and transition infrastructure.
+> M4/M5 scope remains future where called out in the layer specs.
 
 ---
 

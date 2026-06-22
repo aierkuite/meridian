@@ -1,4 +1,5 @@
 import type { PhysicsBody } from "../engine/physics";
+import type { CameraState } from "../engine/camera";
 import { HORIZON_Y, WORLD_H, WORLD_W } from "../game/world";
 import type { SegmentState } from "../game/segment";
 import { createDaySky, createNightSky } from "./palette";
@@ -77,6 +78,7 @@ function drawAvatar(ctx: CanvasRenderingContext2D, body: PhysicsBody, core: HTML
 export function renderScene(
   ctx: CanvasRenderingContext2D,
   state: SegmentState,
+  camera: CameraState,
   renderer: Renderer,
   view: { width: number; height: number; dpr: number },
 ): void {
@@ -85,7 +87,15 @@ export function renderScene(
   const offY = (view.height - WORLD_H * scale) / 2;
 
   ctx.save();
-  ctx.setTransform(view.dpr * scale, 0, 0, view.dpr * scale, view.dpr * offX, view.dpr * offY);
+  // 相机 x 偏移只作用在绘制变换上；gameplay 碰撞永远使用 segment-local 坐标
+  ctx.setTransform(
+    view.dpr * scale,
+    0,
+    0,
+    view.dpr * scale,
+    view.dpr * (offX - camera.x * scale),
+    view.dpr * offY,
+  );
   ctx.imageSmoothingEnabled = true;
 
   const s = state.sun.value;

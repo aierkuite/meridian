@@ -2,8 +2,9 @@
 
 > `src/ui/hud.ts`, `src/ui/overlay.ts`.
 
-> **Status: Plan-derived (pre-implementation).** Source: `plan.md` §3.4, §9, §10,
-> §14. Reconcile after M1/M5.
+> **Status: Reconcile after M1/M2 (2026-06-22).** M1/M2 landed the HUD, pause
+> overlay, reset hint, and removed the M1 win card from progression. Title,
+> ending screens, graduated hints, and polish cues remain M5/M4+ scope.
 
 ---
 
@@ -36,6 +37,14 @@ from the `render/` palette; the HUD just positions and updates it.
 No level-select and **no hard "level complete" screen** (plan §3.4). Transitions
 are camera scrolls (engine), not UI screens. The only full screens are the
 **title** and the **endings**.
+
+### M5 polish candidate: loop-back completion feedback
+
+M2's single-segment loop-back fixture can complete with a weak visible cue:
+both avatars reach exits, the journey enters transition, then the same segment
+reloads from `camera.targetX=0`. This is acceptable infrastructure for M2, but
+M5 should add a minimal completion visual cue that is not a hard win card and
+does not affect replay or gameplay state.
 
 ## Title + ×4 ending screens
 
