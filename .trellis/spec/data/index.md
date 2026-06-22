@@ -4,8 +4,9 @@
 > simulation consumes. Data is `readonly` to the runtime — the simulation reads
 > it, never rewrites it.
 
-> **Status: Plan-derived (pre-implementation).** Source: `plan.md` §3.5, §5, §10.
-> Reconcile after M2/M4.
+> **Status: Reconcile after M1/M2 (2026-06-22).** M2 settled segment data,
+> starts/exits, and compact `solutionPaths`. M4 narration and consequence-driven
+> choice-point data remain future scope.
 
 ---
 

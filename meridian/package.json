@@ -8,7 +8,8 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
-    "check:determinism": "node scripts/check-determinism.mjs"
+    "check:determinism": "node scripts/check-determinism.mjs",
+    "check:replay": "node scripts/check-replay.mjs"
   },
   "devDependencies": {
     "typescript": "~6.0.2",

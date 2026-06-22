@@ -4,14 +4,11 @@
 > is provably beatable, no softlocks" — rests on the simulation being
 > deterministic. Read this before touching anything under `engine/` or `game/`.
 
-> **Status: Partially reconciled with M0 (2026-06-22).** The fixed-timestep
-> loop (§1) and the determinism guard shipped: `engine/loop.ts` advances fixed
-> `DT=1/120` steps with a clamped accumulator, and `meridian/scripts/check-determinism.mjs`
-> (run as `npm run check:determinism`, in CI) greps `src/engine`+`src/game` for
-> `Math.random` / `Date.now` / `new Date` / `performance.now`. **Still future
-> (M2):** §4's `dev/replay.ts` solvability harness + `solutionPath` — the
-> "tested" bar (§5) only activates once that harness exists. Until then M0's
-> gate is typecheck + build + the determinism guard.
+> **Status: Reconcile after M1/M2 (2026-06-22).** The fixed-timestep loop,
+> determinism guard, compact `solutionPaths` schema, and replay solvability
+> harness now exist. The M2 gate is `npm run typecheck`,
+> `npm run check:determinism`, `npm run check:replay`, and `npm run build`.
+> M4 choice-point branch coverage and ending reachability remain future scope.
 
 ---
 
@@ -61,22 +58,23 @@ simulation state; it never feeds back into it.
 This is the primary regression test. Do not rely on manual playtest alone
 (plan §13, reviewer gpt P2).
 
-- Each segment stores a **`solutionPath`**: a recorded designer input sequence
+- Each segment stores **`solutionPaths`**: compact designer input run lists
   known to beat it (see `data/segment-data-format.md`).
-- The harness replays each `solutionPath` on the deterministic loop and
+- The harness expands each `SolutionPath` into fixed-step `InputSnapshot`s,
+  forcing `restart=false` and `pause=false`, then replays it on the deterministic loop and
   **asserts both avatars reach their exits with no softlock**.
-- **It must cover BOTH branches of every choice point** (the cruel shortcut and
-  the whole-hearted path) — plan §10, M6.
-- It also verifies **all ~4 endings are reachable** from the appropriate
-  accumulated `consequence` states.
+- **When M4 choice points land**, it must cover BOTH branches of every choice
+  point (the cruel shortcut and the whole-hearted path) — plan §10, M6.
+- **When M4 endings land**, it also verifies all ~4 endings are reachable from
+  the appropriate accumulated `consequence` states.
 - **Run it on every change** to `engine/`, `game/`, or `data/segments/`.
 
 ```ts
 // contract (shape only)
 for (const seg of allSegments) {
-  for (const path of seg.solutionPaths) {      // includes both choice branches
-    const result = replay(seg, path);
-    assert(result.bothReachedExit && !result.softlocked, `${seg.id} unbeatable`);
+  for (const path of seg.solutionPaths) {      // M4: includes both choice branches
+    const result = replayPath(seg, path);
+    assert(result.reason === "won" && result.resetCount === 0, `${seg.id} unbeatable`);
   }
 }
 ```
@@ -85,7 +83,7 @@ for (const seg of allSegments) {
 
 A change to simulation or segment data is **not done** until:
 
-- [ ] The replay harness is green for every segment, both branches.
+- [ ] The replay harness is green for every segment path; M4 choice segments must cover both branches.
 - [ ] A manual softlock pass on any segment whose geometry/elements changed.
 - [ ] No new nondeterminism introduced (grep your diff for the forbidden calls).
 
