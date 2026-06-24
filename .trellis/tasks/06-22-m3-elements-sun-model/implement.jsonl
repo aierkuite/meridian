@@ -1,0 +1,16 @@
+{"file": ".trellis/spec/project/index.md", "reason": "Project-wide pre-development checklist and quality gate for all Meridian code changes"}
+{"file": ".trellis/spec/project/directory-structure.md", "reason": "Simulation/presentation/tooling boundaries that M3 touches across game, data, render, and dev"}
+{"file": ".trellis/spec/project/typescript-conventions.md", "reason": "Strict TypeScript conventions, element union guidance, and sun invariant rules"}
+{"file": ".trellis/spec/project/determinism-and-testing.md", "reason": "Determinism and replay harness requirements for sun drift and new segment fixtures"}
+{"file": ".trellis/spec/project/error-handling-and-perf.md", "reason": "Fail-fast invariant handling and render performance constraints"}
+{"file": ".trellis/spec/engine/index.md", "reason": "Engine-layer checklist for deterministic simulation changes"}
+{"file": ".trellis/spec/engine/core-loop-and-input.md", "reason": "Fixed-step/input constraints that sun drift and replay must preserve"}
+{"file": ".trellis/spec/engine/dual-world-and-sun.md", "reason": "Locked dual-world control model and shared sun hold/drift semantics"}
+{"file": ".trellis/spec/engine/elements.md", "reason": "MVP element behavior contract and M3 element set"}
+{"file": ".trellis/spec/engine/segments-flow-and-endings.md", "reason": "Segment runtime boundaries and out-of-scope M4 consequence rules"}
+{"file": ".trellis/spec/data/index.md", "reason": "Data-layer checklist for segment content and solution paths"}
+{"file": ".trellis/spec/data/segment-data-format.md", "reason": "Segment schema and mandatory solutionPath replay contract"}
+{"file": ".trellis/spec/render/index.md", "reason": "Render-layer checklist for presentation-only element visuals"}
+{"file": ".trellis/spec/render/silhouette-glow-pipeline.md", "reason": "Canvas 2D glow/performance rules for new element rendering"}
+{"file": ".trellis/spec/ui/index.md", "reason": "UI/debug surface constraints for live sun and drift display"}
+{"file": ".trellis/tasks/06-22-m3-elements-sun-model/research/codebase-baseline.md", "reason": "Repository baseline and M2 observations specific to M3 implementation"}

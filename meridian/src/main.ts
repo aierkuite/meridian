@@ -2,7 +2,7 @@ import { createKeyboardInput, type InputSnapshot } from "./engine/input";
 import { startFixedLoop } from "./engine/loop";
 import { clamp } from "./engine/math";
 import { createJourney, updateJourney, type JourneyState } from "./game/journey";
-import m1Slice from "./data/segments/m1-slice";
+import { segments } from "./data";
 import { createRenderer, renderScene, type Renderer } from "./render/renderer";
 import { createAudio, type AudioEngine } from "./audio/audio";
 import { drawPauseOverlay } from "./ui/hud";
@@ -37,7 +37,7 @@ const context = getRequiredCanvasContext(canvas);
 app.replaceChildren(canvas);
 
 const input = createKeyboardInput(window);
-const journey: JourneyState = createJourney([m1Slice]);
+const journey: JourneyState = createJourney(segments);
 const renderer: Renderer = createRenderer();
 const audio: AudioEngine = createAudio();
 

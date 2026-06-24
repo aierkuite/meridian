@@ -1,0 +1,14 @@
+{"file": ".trellis/spec/project/index.md", "reason": "Project-wide quality checklist for final review"}
+{"file": ".trellis/spec/project/directory-structure.md", "reason": "Verify simulation, presentation, data, and dev boundaries remain intact"}
+{"file": ".trellis/spec/project/typescript-conventions.md", "reason": "Verify strict TypeScript, exhaustive unions, and sun invariant handling"}
+{"file": ".trellis/spec/project/determinism-and-testing.md", "reason": "Verify replay/determinism gates cover all new M3 behavior"}
+{"file": ".trellis/spec/project/error-handling-and-perf.md", "reason": "Verify fail-fast data validation and no render hot-path performance regressions"}
+{"file": ".trellis/spec/engine/index.md", "reason": "Engine-layer quality checklist for deterministic simulation"}
+{"file": ".trellis/spec/engine/dual-world-and-sun.md", "reason": "Verify shared sun drift and mirror-sync invariants"}
+{"file": ".trellis/spec/engine/elements.md", "reason": "Verify new element behaviors match the MVP contract and ice behavior is preserved"}
+{"file": ".trellis/spec/data/index.md", "reason": "Verify edited segment data remains replay-covered and readonly"}
+{"file": ".trellis/spec/data/segment-data-format.md", "reason": "Verify every segment and branch has valid solution paths"}
+{"file": ".trellis/spec/render/index.md", "reason": "Verify render remains presentation-only"}
+{"file": ".trellis/spec/render/silhouette-glow-pipeline.md", "reason": "Verify no per-frame shadowBlur or avoidable glow allocation"}
+{"file": ".trellis/spec/ui/index.md", "reason": "Verify debug/HUD behavior reads state only and reflects live sun/drift"}
+{"file": ".trellis/tasks/06-22-m3-elements-sun-model/research/codebase-baseline.md", "reason": "Check implementation against the M3-specific baseline and known M2 interfaces"}

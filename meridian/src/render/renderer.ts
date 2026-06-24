@@ -1,11 +1,18 @@
 import type { PhysicsBody } from "../engine/physics";
 import type { CameraState } from "../engine/camera";
 import { HORIZON_Y, WORLD_H, WORLD_W } from "../game/world";
+import type { Element, ElementKind, ElementWorld } from "../game/element";
 import type { SegmentState } from "../game/segment";
 import { createDaySky, createNightSky } from "./palette";
 
 const SILHOUETTE = "#0e1220";
+/** 各元素 kind+world 的轮廓填色（design.md §6 minimum differentiation） */
 const ICE_FILL = "#bfe4ee";
+const VINE_DAY_FILL = "#7fae5a";
+const FUNGI_NIGHT_FILL = "#8a4fd3";
+const DOOR_DAY_FILL = "rgba(255,209,102,0.65)";
+const GATE_NIGHT_FILL = "rgba(123,160,255,0.65)";
+const MOTE_FILL = "#ffe6a8";
 const EXIT_SOL = "rgba(255,184,107,0.30)";
 const EXIT_LUNA = "rgba(123,212,255,0.30)";
 
@@ -18,6 +25,8 @@ export interface Renderer {
   readonly lunaCore: HTMLCanvasElement;
   readonly sunOrb: HTMLCanvasElement;
   readonly horizonGlow: HTMLCanvasElement;
+  /** fungi/mote 共用的预渲染辉光精灵（加性合成用，避免 per-frame shadowBlur） */
+  readonly elementGlow: HTMLCanvasElement;
 }
 
 function createRadialGlow(radius: number, r: number, g: number, b: number, peak: number): HTMLCanvasElement {
@@ -64,6 +73,8 @@ export function createRenderer(): Renderer {
     lunaCore: createRadialGlow(34, 123, 212, 255, 0.95),
     sunOrb: createRadialGlow(64, 255, 233, 168, 1),
     horizonGlow: createHorizonGlow(),
+    // 小尺寸辉光精灵：drawImage 时按 box 缩放，供 fungi/mote 加性绘制
+    elementGlow: createRadialGlow(48, 255, 220, 160, 0.55),
   };
 }
 
@@ -73,6 +84,55 @@ function drawAvatar(ctx: CanvasRenderingContext2D, body: PhysicsBody, core: HTML
   ctx.globalCompositeOperation = "lighter";
   ctx.drawImage(core, body.pos.x - core.width / 2, body.pos.y - core.height / 2);
   ctx.globalCompositeOperation = "source-over";
+}
+
+/**
+ * 按 kind + world 选择元素轮廓填色
+ *
+ * 行为属模拟层职责；本函数只做表现层取色，绝不下放 gameplay 判定。
+ *
+ * @param kind 元素类型
+ * @param world 所在世界
+ * @returns 形如 "#rrggbb" 或 "rgba(...)" 的填色字符串
+ */
+function elementFillFor(kind: ElementKind, world: ElementWorld): string {
+  switch (kind) {
+    case "ice":
+      return ICE_FILL;
+    case "vine":
+      // day = 暖绿藤蔓；night = 紫色发光真菌
+      return world === "day" ? VINE_DAY_FILL : FUNGI_NIGHT_FILL;
+    case "door":
+      // day = 暖色光门；night = 冷色暗门
+      return world === "day" ? DOOR_DAY_FILL : GATE_NIGHT_FILL;
+    case "mote":
+      return MOTE_FILL;
+  }
+}
+
+/**
+ * 绘制单个元素：先填轮廓，再为真菌/mote 叠加预渲染辉光（加性合成）
+ *
+ * 不使用 per-frame shadowBlur——辉光来自 createRenderer() 预渲染的精灵，
+ * 用 drawImage + globalCompositeOperation='lighter' 叠加（见 design.md §6）。
+ *
+ * @param ctx 目标 2D 上下文（调用方已设置 globalAlpha）
+ * @param e 待绘制元素
+ * @param renderer 持有预渲染辉光精灵
+ * @returns 无返回值
+ */
+function fillElement(ctx: CanvasRenderingContext2D, e: Element, renderer: Renderer): void {
+  ctx.fillStyle = elementFillFor(e.kind, e.world);
+  ctx.fillRect(e.box.x, e.box.y, e.box.w, e.box.h);
+  // 为真菌（night vine）与 mote 加性叠一层辉光，强化生物发光观感
+  if ((e.kind === "vine" && e.world === "night") || e.kind === "mote") {
+    const glow = renderer.elementGlow;
+    const cx = e.box.x + e.box.w / 2;
+    const cy = e.box.y + e.box.h / 2;
+    ctx.globalCompositeOperation = "lighter";
+    ctx.drawImage(glow, cx - glow.width / 2, cy - glow.height / 2);
+    ctx.globalCompositeOperation = "source-over";
+  }
 }
 
 export function renderScene(
@@ -129,8 +189,7 @@ export function renderScene(
       continue;
     }
     ctx.globalAlpha = alpha;
-    ctx.fillStyle = ICE_FILL;
-    ctx.fillRect(e.box.x, e.box.y, e.box.w, e.box.h);
+    fillElement(ctx, e, renderer);
     ctx.globalAlpha = 1;
   }
 

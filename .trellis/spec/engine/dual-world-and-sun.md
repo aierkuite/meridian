@@ -3,8 +3,9 @@
 > `src/game/world.ts`, `src/game/sun.ts`, `src/game/player.ts`. The signature
 > mechanic of Meridian.
 
-> **Status: Plan-derived (pre-implementation).** Source: `plan.md` §3.1–3.4,
-> §3.3, §4. Shapes are illustrative. Reconcile after M1.
+> **Status: Reconcile after M3 (2026-06-24).** Source: `plan.md` §3.1–3.4,
+> §3.3, §4. M3 landed segment-owned drift profiles and replay-covered drift
+> fixtures; finale gravity blend remains future M4+ scope.
 
 ---
 
@@ -59,6 +60,86 @@ class Sun {
   apply(input: InputSnapshot, dt: number, drift?: DriftProfile): void; // hold or drift+counter
   isHeldStill(target: Sun01, eps: number): boolean; // finale "solstice mark" query
 }
+```
+
+## Drift profile contract (M3)
+
+### 1. Scope / Trigger
+
+Any segment that should pull the sun on its own declares a segment-owned
+`DriftProfile`. This is a data contract between `data/segments/*`,
+`game/segment.ts`, and `game/sun.ts`; replay depends on it staying deterministic.
+
+### 2. Signatures
+
+```ts
+const SUN_INPUT_RATE = 0.8; // s units / second, owned by sun.ts
+
+export interface DriftProfile {
+  readonly direction: -1 | 1; // -1 => s moves toward 0, +1 => s moves toward 1
+  readonly rate: number;      // s units / second
+}
+
+interface SegmentData {
+  readonly initialSun?: Sun01;
+  readonly drift?: DriftProfile;
+}
+
+interface Sun {
+  apply(input: InputSnapshot, dt: number, drift?: DriftProfile): void;
+}
+```
+
+### 3. Contracts
+
+- `sun.ts` remains the only mutation/clamp point for `s`.
+- No-drift segments omit `drift`; the holding dial behavior must remain exactly the
+  M2 behavior.
+- Drift segments pass `SegmentData.drift` into `Sun.apply(...)` every fixed step.
+- `initialSun` controls both segment creation and checkpoint reset; fallback is
+  `0.5`.
+- `rate` is in `s` units per second and must be non-negative.
+- Authored playable drift zones must use `rate < SUN_INPUT_RATE` (`0.8`) so a full
+  counter-press can hold/recover the sun. Prefer a large tuning margin for early
+  content; equality is not acceptable because it leaves no player authority.
+
+### 4. Validation & Error Matrix
+
+| Condition | Required behavior |
+|-----------|-------------------|
+| `drift` omitted | Holding dial; no autonomous movement |
+| `rate < 0` | Throw during sun update / replay; invalid content |
+| `rate >= SUN_INPUT_RATE` in authored content | Reject in review; replay may still be deterministic, but the player cannot counter-hold |
+| `initialSun` omitted | Reset to `0.5` |
+| `initialSun` outside `[0,1]` | Clamp in `sun.ts`; do not scatter clamping into data consumers |
+
+### 5. Good/Base/Bad Cases
+
+- Good: `drift: { direction: 1, rate: 0.12 }` with replay input that occasionally
+  counter-presses `sunDelta: -1`.
+- Base: no `drift` field on teaching segments; player sets `s`, then it holds.
+- Bad: `drift: { direction: -1, rate: 0.8 }`; counter-input only cancels drift and
+  cannot recover from overshoot.
+
+### 6. Tests Required
+
+- `npm run check:replay` must include at least one segment with a drift profile.
+- The drift path must reach both exits with `resetCount === 0`.
+- `npm run check:determinism` must stay green after adding/changing drift data.
+- Manual tuning must verify the player can counter-press to hold or recover `s`.
+
+### 7. Wrong vs Correct
+
+#### Wrong
+
+```ts
+drift: { direction: 1, rate: 0.8 }
+```
+
+#### Correct
+
+```ts
+drift: { direction: 1, rate: 0.12 }
 ```
 
 ### Finale (plan §3.4)

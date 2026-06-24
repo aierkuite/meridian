@@ -70,11 +70,30 @@ function avatarDebugLines(label: string, a: Avatar, bufferRemaining: number): st
 }
 
 /**
+ * 把 segment 的 drift profile 格式化为调试显示用的简短字符串
+ *
+ * - 无 drift：`drift=none`
+ * - 有 drift：`drift=+rate` 或 `drift=-rate`（带符号的 s/秒）
+ *
+ * @param segment 当前活动 segment 状态（只读）
+ * @returns 用于面板显示的单行字符串
+ */
+function driftDebugLine(segment: SegmentState): string {
+  const drift = segment.data.drift;
+  if (drift === undefined) {
+    return "drift=none";
+  }
+  const sign = drift.direction > 0 ? "+" : "-";
+  return `drift=${sign}${drift.rate.toFixed(2)}`;
+}
+
+/**
  * 在视口左上角绘制只读诊断面板
  *
- * 面板内容（design.md §6 minimum list）：
+ * 面板内容（design.md §6 minimum list + §7 drift 可见性）：
  * - 活动 segment id / 索引、journey 状态
  * - s（sun）值
+ * - drift 状态（none 或 ±rate）
  * - Sol / Luna 位置、速度、着地/郊狼/缓冲状态
  * - 相机 x / targetX / transitionFramesRemaining
  *
@@ -96,6 +115,7 @@ function drawTextPanel(
   const lines: string[] = [
     `segment=${segment.data.id} idx=${journey.activeIndex} journey=${journey.status}`,
     `s=${segment.sun.value.toFixed(3)} status=${segment.status} solReached=${segment.solReached} lunaReached=${segment.lunaReached}`,
+    `${driftDebugLine(segment)} initialSun=${segment.data.initialSun ?? 0.5}`,
     ...avatarDebugLines("Sol", segment.player.sol, segment.player.jumpBufferFramesRemaining),
     ...avatarDebugLines("Luna", segment.player.luna, segment.player.jumpBufferFramesRemaining),
     `camera x=${journey.camera.x.toFixed(1)} targetX=${journey.camera.targetX.toFixed(1)} transFrames=${journey.camera.transitionFramesRemaining}`,

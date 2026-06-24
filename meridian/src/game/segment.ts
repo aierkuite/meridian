@@ -3,7 +3,8 @@ import type { InputSnapshot } from "../engine/input";
 import type { PhysicsBody } from "../engine/physics";
 import { bodyOverlaps } from "../engine/physics";
 import { HORIZON_Y, WORLD_H } from "./world";
-import type { Sun } from "./sun";
+import type { Sun, Sun01 } from "./sun";
+import type { DriftProfile } from "./sun";
 import { createSun } from "./sun";
 import type { Player, Avatar } from "./player";
 import { createPlayer, updatePlayer } from "./player";
@@ -54,6 +55,18 @@ export interface SegmentData {
   readonly elements: readonly ElementPlacement[];
   readonly starts: { readonly sol: Vec2; readonly luna: Vec2 };
   readonly exits: ExitZones;
+  /**
+   * 可选初始太阳值（design.md §4）
+   *
+   * 缺省 0.5。teaching beat 保持缺省即可；drift/mote 关卡可按需设定。
+   */
+  readonly initialSun?: Sun01;
+  /**
+   * 可选太阳漂移剖面（design.md §4，back-third / drift zone 段使用）
+   *
+   * 缺省（undefined）即 M2 holding dial 行为。
+   */
+  readonly drift?: DriftProfile;
   readonly solutionPaths: readonly SolutionPath[];
 }
 
@@ -69,11 +82,21 @@ export interface SegmentState {
   readonly lunaSolids: AABB[];
 }
 
+/**
+ * 解析 segment 的初始太阳值（缺省 0.5）
+ *
+ * @param data segment 静态数据
+ * @returns 该段应使用的初始 s（已落入 [0,1]，由 createSun 内部 clamp 兜底）
+ */
+function initialSunFor(data: SegmentData): Sun01 {
+  return data.initialSun ?? 0.5;
+}
+
 export function createSegment(data: SegmentData): SegmentState {
   return {
     data,
     player: createPlayer(data.starts.sol, data.starts.luna),
-    sun: createSun(0.5),
+    sun: createSun(initialSunFor(data)),
     elements: data.elements.map(createElement),
     status: "playing",
     solReached: false,
@@ -108,7 +131,8 @@ export function resetSegment(state: SegmentState): void {
   resetAvatar(state.player.luna, state.data.starts.luna);
   state.player.prevJump = false;
   state.player.jumpBufferFramesRemaining = 0;
-  state.sun.reset(0.5);
+  // 重置回该 segment 的 initialSun（design.md §4：data.initialSun ?? 0.5）
+  state.sun.reset(initialSunFor(state.data));
   state.status = "playing";
   state.solReached = false;
   state.lunaReached = false;
@@ -149,7 +173,8 @@ export function updateSegment(state: SegmentState, input: InputSnapshot, dt: num
   if (state.status !== "playing") {
     return;
   }
-  state.sun.apply(input, dt);
+  // 把 segment 自带的 drift 喂给 sun.apply（design.md §4）；无 drift 时退化为 M2 行为
+  state.sun.apply(input, dt, state.data.drift);
   gatherSolids(state);
   updatePlayer(state.player, input, dt, state.solSolids, state.lunaSolids);
 

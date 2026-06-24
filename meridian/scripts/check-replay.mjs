@@ -31,9 +31,10 @@ async function main() {
   const server = await createServer({ server: { middlewareMode: true } });
   try {
     const replayModule = await server.ssrLoadModule("/src/dev/replay.ts");
-    const dataModule = await server.ssrLoadModule("/src/data/segments/m1-slice.ts");
+    const dataModule = await server.ssrLoadModule("/src/data/index.ts");
 
-    const segments = [dataModule.default];
+    // 消费与 main.ts 同一份有序 segment 列表，避免 fixture 漂移
+    const segments = dataModule.segments;
     const results = replayModule.runReplaySuite(segments);
 
     for (const result of results) {
