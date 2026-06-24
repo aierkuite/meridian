@@ -1,0 +1,15 @@
+{"file":"plan.md","reason":"Verify implementation stays inside M4/MVP scope and does not drift into stretch or M5 polish"}
+{"file":".trellis/tasks/06-24-m4-content-mvp/prd.md","reason":"Check delivered behavior against task acceptance criteria"}
+{"file":".trellis/tasks/06-24-m4-content-mvp/design.md","reason":"Check implementation follows the planned contracts and boundaries"}
+{"file":".trellis/tasks/06-24-m4-content-mvp/implement.md","reason":"Check all required implementation steps and validation gates were covered"}
+{"file":".trellis/spec/project/determinism-and-testing.md","reason":"Audit replay, determinism, branch coverage, and ending reachability"}
+{"file":".trellis/spec/project/directory-structure.md","reason":"Audit simulation/presentation boundary violations"}
+{"file":".trellis/spec/project/typescript-conventions.md","reason":"Audit strict TypeScript, closed unions, and serializable consequence state"}
+{"file":".trellis/spec/engine/segments-flow-and-endings.md","reason":"Audit consequence write rules, ending resolution, and no finale choice"}
+{"file":".trellis/spec/engine/dual-world-and-sun.md","reason":"Audit mirror-sync, drift, and reunion hold-the-sun behavior"}
+{"file":".trellis/spec/data/segment-data-format.md","reason":"Audit segment data, solution paths, and choice branch coverage"}
+{"file":".trellis/spec/data/narration-text.md","reason":"Audit English narration, adaptive lines, and graduated hints"}
+{"file":".trellis/spec/ui/ui-guidelines.md","reason":"Audit ending screens, hint surface, and absence of skip/level-select UI"}
+{"file":".trellis/spec/render/silhouette-glow-pipeline.md","reason":"Audit core dimming readability and no per-frame shadowBlur"}
+{"file":".trellis/spec/guides/cross-layer-thinking-guide.md","reason":"Audit data flow from segments/story through simulation to presentation"}
+{"file":".trellis/spec/guides/code-reuse-thinking-guide.md","reason":"Audit for duplicated ending/consequence/narration logic across consumers"}

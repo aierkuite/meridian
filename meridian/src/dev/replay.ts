@@ -19,6 +19,13 @@ import {
   type SolutionInput,
   type SolutionPath,
 } from "../game/segment";
+import {
+  createConsequence,
+  recordWhole,
+  spendShortcut,
+  type Consequence,
+} from "../game/consequence";
+import { ALL_ENDING_IDS, resolveEnding, type EndingId } from "../game/ending";
 
 /** 回放停止原因 */
 export type ReplayStopReason = "won" | "timeout" | "reset" | "missing-path";
@@ -29,12 +36,16 @@ export interface ReplayResult {
   readonly segmentId: string;
   /** 被回放的解法路径 id */
   readonly pathId: string;
-  /** 是否最终取得胜利（两位 avatar 都抵达出口） */
+  /** 该路径声明的分支（main / whole / shortcut；未声明为 undefined） */
+  readonly branch: SolutionPath["branch"];
+  /** 是否最终取得胜利（两位 avatar 都抵达出口 / 终章融合完成） */
   readonly reachedExit: boolean;
   /** 回放过程中由死亡触发的重置次数（>0 即视为异常） */
   readonly resetCount: number;
   /** 实际跑过的固定步数 */
   readonly framesRun: number;
+  /** 回放结束时是否踩到了该段 choicePoint 的 shortcut zone */
+  readonly shortcutTriggered: boolean;
   /** 停止原因 */
   readonly reason: ReplayStopReason;
 }
@@ -154,9 +165,11 @@ export function replayPath(data: SegmentData, path: SolutionPath): ReplayResult 
   return {
     segmentId: data.id,
     pathId: path.id,
+    branch: path.branch,
     reachedExit: state.status === "won" && state.solReached && state.lunaReached,
     resetCount,
     framesRun,
+    shortcutTriggered: state.shortcutTriggered,
     reason,
   };
 }
@@ -175,9 +188,11 @@ export function runReplaySuite(segments: readonly SegmentData[]): ReplayResult[]
       results.push({
         segmentId: segment.id,
         pathId: "<missing>",
+        branch: undefined,
         reachedExit: false,
         resetCount: 0,
         framesRun: 0,
+        shortcutTriggered: false,
         reason: "missing-path",
       });
       continue;
@@ -200,7 +215,98 @@ export function runReplaySuite(segments: readonly SegmentData[]): ReplayResult[]
 export function summarizeReplay(results: readonly ReplayResult[]): string {
   return results
     .map((r) => {
-      return `${r.segmentId}/${r.pathId}: reason=${r.reason} reachedExit=${r.reachedExit} resets=${r.resetCount} frames=${r.framesRun}`;
+      return `${r.segmentId}/${r.pathId}: reason=${r.reason} reachedExit=${r.reachedExit} resets=${r.resetCount} frames=${r.framesRun} branch=${r.branch ?? "-"} shortcut=${r.shortcutTriggered}`;
     })
     .join("\n");
+}
+
+/**
+ * 校验所有 choicePoint 段的分支覆盖与代价行为（design.md §10）
+ *
+ * 对每个携带 choicePoint 的 segment 断言：
+ * - 至少各有一条 branch === "whole" 与 branch === "shortcut" 的解法路径
+ * - 回放 shortcut 路径必须踩到 zone（shortcutTriggered === true）
+ * - 回放 whole 路径必须不踩 zone（shortcutTriggered === false）
+ * 后两条等价于「shortcut 路线确实施加了 cost、whole 路线未施加任何 cost」，
+ * 因为扣光在 journey 中是「踩到 zone 才发生」的确定性结果。
+ *
+ * @param segments 待校验的 segment 数据列表
+ * @returns 违规描述列表；为空表示全部通过
+ */
+export function checkBranchCoverage(segments: readonly SegmentData[]): string[] {
+  const problems: string[] = [];
+
+  for (const segment of segments) {
+    const cp = segment.choicePoint;
+    if (cp === undefined) {
+      continue;
+    }
+    const wholePaths = segment.solutionPaths.filter((p) => p.branch === "whole");
+    const shortcutPaths = segment.solutionPaths.filter((p) => p.branch === "shortcut");
+
+    if (wholePaths.length === 0) {
+      problems.push(`${segment.id}: missing "whole" branch path`);
+    }
+    if (shortcutPaths.length === 0) {
+      problems.push(`${segment.id}: missing "shortcut" branch path`);
+    }
+
+    for (const path of wholePaths) {
+      const result = replayPath(segment, path);
+      if (result.shortcutTriggered) {
+        problems.push(`${segment.id}/${path.id}: whole path unexpectedly triggered shortcut zone`);
+      }
+    }
+    for (const path of shortcutPaths) {
+      const result = replayPath(segment, path);
+      if (!result.shortcutTriggered) {
+        problems.push(`${segment.id}/${path.id}: shortcut path did not trigger shortcut zone`);
+      }
+    }
+  }
+
+  return problems;
+}
+
+/** ending 可达性枚举报告 */
+export interface EndingReachabilityReport {
+  /** 由 authored 选择组合实际可达的结局 id（有序去重） */
+  readonly observed: readonly EndingId[];
+  /** 四种结局中尚未被任何组合命中的 id */
+  readonly missing: readonly EndingId[];
+}
+
+/**
+ * 枚举 authored choicePoint 的 whole/shortcut 组合，证明四种结局均可达（design.md §10）
+ *
+ * 对所有携带 choicePoint 的 segment 取 2^n 种 whole/shortcut 组合，从满光
+ * consequence 出发应用各自的 cost（shortcut 走 spendShortcut，whole 走 recordWhole），
+ * 再 resolveEnding；汇总命中的结局集合并与四种 ending id 比对。
+ *
+ * @param segments 待枚举的 segment 数据列表
+ * @returns 可达结局与缺失结局报告
+ */
+export function endingReachabilityReport(segments: readonly SegmentData[]): EndingReachabilityReport {
+  const choiceSegments = segments.filter((s) => s.choicePoint !== undefined);
+  const observed = new Set<EndingId>();
+  const combos = 1 << choiceSegments.length;
+
+  for (let mask = 0; mask < combos; mask += 1) {
+    let consequence: Consequence = createConsequence();
+    for (let i = 0; i < choiceSegments.length; i += 1) {
+      const cp = choiceSegments[i]?.choicePoint;
+      if (cp === undefined) {
+        continue;
+      }
+      const takeShortcut = (mask & (1 << i)) !== 0;
+      consequence = takeShortcut
+        ? spendShortcut(consequence, cp.id, cp.cost)
+        : recordWhole(consequence, cp.id);
+    }
+    observed.add(resolveEnding(consequence));
+  }
+
+  const missing = ALL_ENDING_IDS.filter((id) => !observed.has(id));
+  const orderedObserved = ALL_ENDING_IDS.filter((id) => observed.has(id));
+  return { observed: orderedObserved, missing };
 }

@@ -5,7 +5,7 @@ import { createJourney, updateJourney, type JourneyState } from "./game/journey"
 import { segments } from "./data";
 import { createRenderer, renderScene, type Renderer } from "./render/renderer";
 import { createAudio, type AudioEngine } from "./audio/audio";
-import { drawPauseOverlay } from "./ui/hud";
+import { drawEndingScreen, drawHud, drawPauseOverlay } from "./ui/hud";
 // 静态 import：生产构建中 Vite 会把 `import.meta.env.DEV` 折叠为 false，
 // 进而把本模块整条 import 与 `drawDebugOverlay` 的调用一并 tree-shake。
 import { drawDebugOverlay } from "./dev/debugOverlay";
@@ -144,7 +144,15 @@ function render(_alpha: number): void {
   context.fillStyle = "#05070f";
   context.fillRect(0, 0, width, height);
 
-  renderScene(context, journey.active, journey.camera, renderer, { width, height, dpr });
+  renderScene(context, journey.active, journey.camera, renderer, { width, height, dpr }, journey.consequence);
+
+  // 表现层只读 journey：终态绘结局屏，否则绘航程内 HUD（叙事/提示/终章进度）。
+  // 结局 id 由 journey.resolvedEnding 给出，UI 绝不重算结局规则。
+  if (journey.status === "ending" && journey.resolvedEnding !== undefined) {
+    drawEndingScreen(context, width, height, journey.resolvedEnding);
+  } else {
+    drawHud(context, width, height, journey);
+  }
 
   if (paused) {
     drawPauseOverlay(context, width, height);

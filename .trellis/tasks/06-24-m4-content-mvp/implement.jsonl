@@ -1,0 +1,18 @@
+{"file":"plan.md","reason":"Source of truth for M4 content scope, MVP freeze line, endings, choice points, narration, and finale"}
+{"file":".trellis/tasks/06-24-m4-content-mvp/prd.md","reason":"Task requirements and acceptance criteria for M4"}
+{"file":".trellis/tasks/06-24-m4-content-mvp/design.md","reason":"Technical design and cross-layer contracts for consequence, endings, narration, finale, and replay"}
+{"file":".trellis/tasks/06-24-m4-content-mvp/implement.md","reason":"Ordered execution plan and validation gates"}
+{"file":".trellis/spec/project/directory-structure.md","reason":"Simulation/presentation boundaries and source tree conventions"}
+{"file":".trellis/spec/project/typescript-conventions.md","reason":"Strict TypeScript, discriminated unions, consequence and ending shape guidance"}
+{"file":".trellis/spec/project/determinism-and-testing.md","reason":"Replay harness, deterministic simulation, branch coverage, and ending reachability requirements"}
+{"file":".trellis/spec/project/error-handling-and-perf.md","reason":"Reset, softlock, hint, and per-frame performance constraints"}
+{"file":".trellis/spec/engine/segments-flow-and-endings.md","reason":"Segment flow, consequence write rules, ending resolver, and beat order"}
+{"file":".trellis/spec/engine/dual-world-and-sun.md","reason":"Shared sun, drift, finale hold-the-sun, and mirror-sync invariants"}
+{"file":".trellis/spec/engine/elements.md","reason":"Existing element contract and MVP vocabulary to reuse in formal M4 content"}
+{"file":".trellis/spec/data/segment-data-format.md","reason":"Segment schema, solutionPaths, choice branch paths, and authoring rules"}
+{"file":".trellis/spec/data/narration-text.md","reason":"English story text, adaptive narration, endings, and graduated hint rules"}
+{"file":".trellis/spec/ui/ui-guidelines.md","reason":"HUD, narration, hint, and ending screen presentation constraints"}
+{"file":".trellis/spec/render/silhouette-glow-pipeline.md","reason":"Core dimming and glow presentation constraints without per-frame shadowBlur"}
+{"file":".trellis/spec/guides/cross-layer-thinking-guide.md","reason":"M4 spans data, simulation, replay, render, and UI contracts"}
+{"file":".trellis/tasks/archive/2026-06/06-22-m3-elements-sun-model/prd.md","reason":"Archived M3 scope and confirmed facts about existing mechanics"}
+{"file":".trellis/tasks/archive/2026-06/06-22-m3-elements-sun-model/design.md","reason":"Archived M3 design for element and drift contracts that M4 builds on"}

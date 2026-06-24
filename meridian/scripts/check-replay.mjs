@@ -55,6 +55,28 @@ async function main() {
     }
 
     console.log(`Replay harness passed: ${results.length} path(s) won`);
+
+    // M4：选择点分支覆盖（每个 choicePoint 段需 whole + shortcut，且代价行为正确）
+    const branchProblems = replayModule.checkBranchCoverage(segments);
+    if (branchProblems.length > 0) {
+      console.error("Branch coverage failed:");
+      for (const problem of branchProblems) {
+        console.error(`  ${problem}`);
+      }
+      process.exitCode = 1;
+      return;
+    }
+    console.log("Branch coverage passed: all choice points cover whole + shortcut");
+
+    // M4：结局可达性（四种结局都能由 authored 选择组合命中）
+    const reach = replayModule.endingReachabilityReport(segments);
+    console.log(`Endings reachable: ${reach.observed.join(", ")}`);
+    if (reach.missing.length > 0) {
+      console.error(`Ending reachability failed: missing ${reach.missing.join(", ")}`);
+      process.exitCode = 1;
+      return;
+    }
+    console.log("Ending reachability passed: all four endings reachable");
   } finally {
     await server.close();
   }

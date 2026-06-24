@@ -1,11 +1,15 @@
 import type { PhysicsBody } from "../engine/physics";
 import type { CameraState } from "../engine/camera";
+import { clamp } from "../engine/math";
 import { HORIZON_Y, WORLD_H, WORLD_W } from "../game/world";
 import type { Element, ElementKind, ElementWorld } from "../game/element";
 import type { SegmentState } from "../game/segment";
+import type { Consequence } from "../game/consequence";
 import { createDaySky, createNightSky } from "./palette";
 
 const SILHOUETTE = "#0e1220";
+/** 核心辉光最暗时仍保留的 alpha 地板：耗尽的光是「黯淡余烬」而非「消失」（AC4） */
+const CORE_DIM_FLOOR = 0.18;
 /** 各元素 kind+world 的轮廓填色（design.md §6 minimum differentiation） */
 const ICE_FILL = "#bfe4ee";
 const VINE_DAY_FILL = "#7fae5a";
@@ -78,11 +82,43 @@ export function createRenderer(): Renderer {
   };
 }
 
-function drawAvatar(ctx: CanvasRenderingContext2D, body: PhysicsBody, core: HTMLCanvasElement): void {
+/**
+ * 把 consequence 的剩余光值映射为核心辉光亮度（AC4 / AC10）
+ *
+ * 用 alpha/亮度而非色相承载「已花费的光」：满光为 1，耗尽时落到 CORE_DIM_FLOOR
+ * 的暗余烬，保证 silhouette 始终在场（牺牲＝变暗，不是移除），且不以纯色相表义。
+ *
+ * @param light 该核剩余光值（consequence.solLight / lunaLight，[0,1]）
+ * @returns 绘制核心辉光时应使用的 globalAlpha（[CORE_DIM_FLOOR, 1]）
+ */
+function coreBrightness(light: number): number {
+  return CORE_DIM_FLOOR + (1 - CORE_DIM_FLOOR) * clamp(light, 0, 1);
+}
+
+/**
+ * 绘制单个 avatar：实心轮廓恒亮在场，核心辉光按 brightness 加性叠加
+ *
+ * 轮廓（silhouette）不受 consequence 影响，确保两位 avatar 全程可见；只有核心
+ * 辉光随花费的光变暗（globalAlpha=brightness），表义经由亮度而非色相。
+ *
+ * @param ctx 目标 2D 上下文
+ * @param body 该 avatar 的物理体（提供位置与半尺寸）
+ * @param core 预渲染的核心辉光精灵
+ * @param brightness 核心辉光亮度（coreBrightness 的返回值，[CORE_DIM_FLOOR,1]）
+ * @returns 无返回值
+ */
+function drawAvatar(
+  ctx: CanvasRenderingContext2D,
+  body: PhysicsBody,
+  core: HTMLCanvasElement,
+  brightness: number,
+): void {
   ctx.fillStyle = SILHOUETTE;
   ctx.fillRect(body.pos.x - body.half.x, body.pos.y - body.half.y, body.half.x * 2, body.half.y * 2);
   ctx.globalCompositeOperation = "lighter";
+  ctx.globalAlpha = brightness;
   ctx.drawImage(core, body.pos.x - core.width / 2, body.pos.y - core.height / 2);
+  ctx.globalAlpha = 1;
   ctx.globalCompositeOperation = "source-over";
 }
 
@@ -141,6 +177,7 @@ export function renderScene(
   camera: CameraState,
   renderer: Renderer,
   view: { width: number; height: number; dpr: number },
+  consequence: Consequence,
 ): void {
   const scale = Math.min(view.width / WORLD_W, view.height / WORLD_H);
   const offX = (view.width - WORLD_W * scale) / 2;
@@ -193,8 +230,9 @@ export function renderScene(
     ctx.globalAlpha = 1;
   }
 
-  drawAvatar(ctx, state.player.sol, renderer.solCore);
-  drawAvatar(ctx, state.player.luna, renderer.lunaCore);
+  // 核心辉光按 consequence 剩余光值变暗（AC4/AC10）；silhouette 不受影响恒在场
+  drawAvatar(ctx, state.player.sol, renderer.solCore, coreBrightness(consequence.solLight));
+  drawAvatar(ctx, state.player.luna, renderer.lunaCore, coreBrightness(consequence.lunaLight));
 
   ctx.globalCompositeOperation = "lighter";
   ctx.drawImage(renderer.horizonGlow, 0, HORIZON_Y - 20);
