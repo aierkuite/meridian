@@ -5,9 +5,10 @@
 > framework). Layer-specific rules live in `engine/`, `render/`, `audio/`,
 > `data/`, `ui/`.
 
-> **Status: Reconcile after M1/M2 (2026-06-22).** The app now lives under
-> `meridian/` with M1/M2 gameplay, replay, debug, and transition infrastructure.
-> M4/M5 scope remains future where called out in the layer specs.
+> **Status: Reconcile after M4 (2026-06-24).** The app lives under `meridian/`
+> with gameplay, replay, debug, transition infrastructure, formal M4 content,
+> consequence/ending flow, narration, hints, and ending screens. M5 audio/VFX
+> polish remains future where called out in the layer specs.
 
 ---
 

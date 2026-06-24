@@ -2,9 +2,9 @@
 
 > `src/ui/hud.ts`, `src/ui/overlay.ts`.
 
-> **Status: Reconcile after M1/M2 (2026-06-22).** M1/M2 landed the HUD, pause
-> overlay, reset hint, and removed the M1 win card from progression. Title,
-> ending screens, graduated hints, and polish cues remain M5/M4+ scope.
+> **Status: Reconcile after M4 (2026-06-24).** M1/M2 landed the HUD and pause
+> overlay; M4 landed narration, graduated hints, finale progress, and four
+> ending screens. Title polish remains future scope.
 
 ---
 
@@ -53,12 +53,80 @@ One title screen, and **four** ending screens — One Sky / The Vow / The Afterg
 [`ending.id`](../engine/segments-flow-and-endings.md) and pairing with its audio
 resolution. All four must be reachable and verified.
 
+### M4 ending screen contract
+
+1. Scope / Trigger
+
+   Any terminal UI must be driven by `JourneyState.status === "ending"` and
+   `JourneyState.resolvedEnding`. UI must not run `resolveEnding` itself.
+
+2. Signatures
+
+   ```ts
+   function drawEndingScreen(
+     ctx: CanvasRenderingContext2D,
+     width: number,
+     height: number,
+     ending: EndingId,
+   ): void;
+   ```
+
+3. Contracts
+
+   - `drawEndingScreen` reads `endingTextFor(ending)` for the title and closer.
+   - The screen may show the restart prompt `Press R to begin again.`
+   - Pressing `R` while journey status is `"ending"` restarts the full journey
+     with fresh consequence. Pressing `R` during `"playing"` or
+     `"transitioning"` resets only the current segment.
+   - No level-select, ending gallery, continue/save, or skip affordance is part
+     of M4.
+
+4. Validation & Error Matrix
+
+   | Condition | Required behavior |
+   |-----------|-------------------|
+   | `resolvedEnding` is `"one-sky"` | One Sky title and closer render |
+   | `resolvedEnding` is `"vow"` | The Vow title and closer render |
+   | `resolvedEnding` is `"afterglow"` | The Afterglow title and closer render |
+   | `resolvedEnding` is `"long-dark"` | The Long Dark title and closer render |
+   | User presses `R` on ending screen | full journey restart |
+
+5. Good/Base/Bad Cases
+
+   - Good: render the title/closer from `endingTextFor(journey.resolvedEnding)`.
+   - Base: in-journey HUD shows beat text and no full-screen card.
+   - Bad: showing a menu that lets the player choose an ending after Reunion.
+
+6. Tests Required
+
+   - `npm run check:replay` must prove all four ending ids reachable.
+   - Manual browser review must verify the screen text is readable and matches
+     the resolved ending.
+
+7. Wrong vs Correct
+
+   Wrong:
+
+   ```ts
+   const ending = resolveEnding(uiLocalConsequence);
+   ```
+
+   Correct:
+
+   ```ts
+   drawEndingScreen(ctx, width, height, journey.resolvedEnding);
+   ```
+
 ## Graduated-hint surface (no free skip)
 
 Surface the escalating narration hints (`game/narration.ts` →
 [`data/story.ts`](../data/narration-text.md)) at a genuine stuck-point. This is
 the humane backstop **instead of** a skip button (plan §9). Present them quietly;
 never a "skip level" affordance.
+
+The HUD may also show the Reunion finale progress by reading
+`finaleFusionProgress(activeSegment)`. This is a read-only progress surface, not
+an input gate.
 
 ## Controls (plan §9)
 

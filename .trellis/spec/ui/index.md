@@ -4,9 +4,10 @@
 > the sun dial, pause/reset, title, the ×4 ending screens, and the graduated-hint
 > surface. Reads simulation state; routes only player intent (pause/reset) back.
 
-> **Status: Reconcile after M1/M2 (2026-06-22).** M1/M2 landed the HUD, pause
-> overlay, reset hint, and no-win-card progression. Title, endings, graduated
-> hints, and completion polish remain future scope.
+> **Status: Reconcile after M4 (2026-06-24).** M1/M2 landed the HUD, pause
+> overlay, reset hint, and no-win-card progression. M4 landed narration,
+> graduated hints, finale progress, and ending screens; title polish remains
+> future scope.
 
 ---
 

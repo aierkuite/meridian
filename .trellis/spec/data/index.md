@@ -4,9 +4,9 @@
 > simulation consumes. Data is `readonly` to the runtime — the simulation reads
 > it, never rewrites it.
 
-> **Status: Reconcile after M1/M2 (2026-06-22).** M2 settled segment data,
-> starts/exits, and compact `solutionPaths`. M4 narration and consequence-driven
-> choice-point data remain future scope.
+> **Status: Reconcile after M4 (2026-06-24).** M2 settled segment data,
+> starts/exits, and compact `solutionPaths`. M4 landed formal journey exports,
+> choice-point data, finale data, narration text, adaptive lines, and hints.
 
 ---
 

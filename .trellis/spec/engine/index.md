@@ -6,9 +6,10 @@
 > narration logic). Everything here must obey
 > [Determinism & Testing](../project/determinism-and-testing.md).
 
-> **Status: Reconcile after M1/M2 (2026-06-22).** M1/M2 landed the fixed loop,
+> **Status: Reconcile after M4 (2026-06-24).** M1/M2 landed the fixed loop,
 > input, physics, segment runtime, journey transition, and camera state. M3/M4
-> element, consequence, narration, and ending specs remain future where noted.
+> landed the element set, drift profiles, consequence, narration, finale gate,
+> and ending resolver.
 
 ---
 
@@ -29,7 +30,7 @@
 - [ ] This is **simulation** code — it must be deterministic and render-free. Re-read [Determinism & Testing](../project/determinism-and-testing.md).
 - [ ] Will this change keep every segment beatable on its `solutionPath`, both choice-point branches?
 - [ ] Does it respect the **locked core** (plan §2): one input drives both avatars, horizontal identical, vertical mirrored; `s` single value with opposite effects?
-- [ ] Am I adding state that the ending reads? It must be written **only at choice points**, never by incidental death.
+- [ ] Am I adding state that the ending reads? Light must be spent **only by choice-point shortcuts**, never by incidental death.
 
 ## Quality Check
 

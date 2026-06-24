@@ -1,12 +1,10 @@
 # TypeScript Conventions
 
-> **Status: Partially reconciled with M0 (2026-06-22).** `tsconfig.json` is the
-> full strict suite (`strict`, `noUncheckedIndexedAccess`,
+> **Status: Reconcile after M4 (2026-06-24).** `tsconfig.json` is the full
+> strict suite (`strict`, `noUncheckedIndexedAccess`,
 > `exactOptionalPropertyTypes`, `verbatimModuleSyntax`, `isolatedModules`,
-> `noEmit`, `moduleResolution: bundler`, ES2022+DOM); `tsc --noEmit` is a CI
-> gate. `engine/math.ts` ships `Vec2` + `clamp`/`vec2` exactly as below. The
-> element/ending/consequence unions (§discriminated unions, element contract,
-> `Consequence`) remain illustrative — they land in M1+ (`game/`).
+> `noEmit`, `moduleResolution: bundler`, ES2022+DOM). M4 landed closed
+> choice/ending unions and serializable consequence state.
 
 ---
 
@@ -40,18 +38,16 @@ export type Sun01 = number; // invariant: 0 ≤ s ≤ 1, clamped in sun.ts only
 
 ## Discriminated unions for closed sets
 
-Meridian has two naturally-closed sets — **elements** and **endings**. Model
-them as discriminated unions so `switch` is exhaustive (the compiler catches a
-missing case when a new variant is added):
+Meridian has naturally-closed sets — **elements**, **choice points**, **choice
+routes**, **consequence bands**, and **endings**. Model them as literal unions so
+`switch` and record keys are exhaustive:
 
 ```ts
-type ElementKind = "ice" | "vine" | "door" | "mote"; // (+ stretch: "shadow" | "hazard")
-
-type Ending =
-  | { id: "one-sky" }       // light kept (almost) full
-  | { id: "vow" }           // a few shortcuts, partial
-  | { id: "afterglow" }     // lopsided spending
-  | { id: "long-dark" };    // light spent to nothing
+type ElementKind = "ice" | "vine" | "door" | "mote";
+type ChoicePointId = "doors-cost" | "drift-cost" | "master-cost";
+type ChoiceRoute = "whole" | "shortcut";
+type ConsequenceBand = "whole" | "spent" | "lopsided" | "dark";
+type EndingId = "one-sky" | "vow" | "afterglow" | "long-dark";
 ```
 
 ## Element contract
@@ -74,12 +70,17 @@ interface Element {
 The branch state written *only* by choice points (never by incidental death):
 
 ```ts
-type Consequence = {
-  solLight: number;   // 0..1 remaining
-  lunaLight: number;  // 0..1 remaining
-  shortcutsTaken: number;
-};
+interface Consequence {
+  readonly solLight: number;
+  readonly lunaLight: number;
+  readonly shortcutsTaken: number;
+  readonly choices: Readonly<Record<ChoicePointId, ChoiceRoute | "unresolved">>;
+}
 ```
+
+- Clamp light in `game/consequence.ts`, not in render, UI, or ending consumers.
+- Keep choice ids closed. Adding a choice point requires updating the union,
+  `createConsequence`, story prompts, segment data, and replay reachability.
 
 ---
 

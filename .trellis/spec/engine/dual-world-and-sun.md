@@ -3,9 +3,9 @@
 > `src/game/world.ts`, `src/game/sun.ts`, `src/game/player.ts`. The signature
 > mechanic of Meridian.
 
-> **Status: Reconcile after M3 (2026-06-24).** Source: `plan.md` §3.1–3.4,
-> §3.3, §4. M3 landed segment-owned drift profiles and replay-covered drift
-> fixtures; finale gravity blend remains future M4+ scope.
+> **Status: Reconcile after M4 (2026-06-24).** Source: `plan.md` §3.1–3.4,
+> §3.3, §4. M3 landed segment-owned drift profiles; M4 landed the Reunion
+> hold-and-dissolve finale gate. Deeper gravity blending remains future scope.
 
 ---
 
@@ -19,8 +19,9 @@ One logical scene, **horizon at the vertical center** (plan §3.1):
 - Each segment authors **two terrains** (top + bottom). They visually echo across
   the horizon but have **independently designed platforms** — that's what makes
   the puzzle real ("find inputs that work for both").
-- `world.ts` owns the per-world `gravitySign` consumed by physics, and (finale
-  only) the **gravity blend** when the horizon dissolves (plan §3.4).
+- `world.ts` owns the per-world `gravitySign` consumed by physics. The M4
+  finale uses a hold-and-dissolve gate without changing the gravity model;
+  deeper gravity blending remains post-MVP.
 
 ## Control coupling — mirror-sync (`player.ts`)
 
@@ -142,13 +143,96 @@ drift: { direction: 1, rate: 0.8 }
 drift: { direction: 1, rate: 0.12 }
 ```
 
-### Finale (plan §3.4)
+## Reunion finale gate (M4)
 
-In the reunion segment the sun **drifts**; only when **both avatars stand on
-their solstice marks** does the sun stand still, which **dissolves the horizon**
-and **blends the two gravities**. This is mechanical, not a cutscene — and there
-is **no last-second choice**; the ending was already earned (see
-[Segments, Flow & Endings](./segments-flow-and-endings.md)).
+The Reunion segment is mechanical, not a cutscene. It uses segment data to gate
+the earned ending:
+
+```ts
+interface FinaleData {
+  readonly solsticeMarks: {
+    readonly sol: AABB;
+    readonly luna: AABB;
+  };
+  readonly sunWindow: { readonly min: Sun01; readonly max: Sun01 };
+  readonly holdFrames: number;
+  readonly dissolveFrames: number;
+}
+
+function finaleFusionProgress(state: SegmentState): number;
+```
+
+### 1. Scope / Trigger
+
+Only the final `reunion-meridian` segment should carry `finale`. It replaces the
+normal exit win check with a deterministic hold-and-dissolve gate, then journey
+resolves the already-earned ending.
+
+### 2. Signatures
+
+- `SegmentData.finale?: FinaleData`
+- `SegmentState.finaleHoldFrames: number`
+- `SegmentState.finaleDissolveFrames: number`
+- `finaleFusionProgress(state): number`
+
+### 3. Contracts
+
+- Both avatars must overlap their own `solsticeMarks` at the same time.
+- The shared sun must stay within `sunWindow.min <= s <= sunWindow.max`.
+- `finaleHoldFrames` increments only while both mark overlap and sun-window
+  conditions are true; any interruption before completion resets hold to `0`.
+- After hold completion, `finaleDissolveFrames` increments deterministically until
+  it reaches `dissolveFrames`.
+- When dissolve completes, the segment sets both reached flags and status
+  `"won"`; `journey.ts` then resolves the ending. No finale input or UI choice is
+  allowed.
+- `finaleFusionProgress` returns `[0,1]`, with hold contributing the first half
+  and dissolve the second half. Render/UI may read it; they must not write finale
+  counters.
+
+### 4. Validation & Error Matrix
+
+| Condition | Required behavior |
+|-----------|-------------------|
+| One avatar off its mark | hold remains or resets to `0`; no dissolve |
+| Sun outside window before hold completes | hold resets to `0`; no dissolve |
+| Hold reaches `holdFrames` | dissolve begins |
+| Dissolve reaches `dissolveFrames` | segment wins |
+| Finale segment wins | journey enters `"ending"` and resolves accumulated consequence |
+
+### 5. Good/Base/Bad Cases
+
+- Good: `reunion-meridian` has `drift`, `finale`, one `branch: "main"` replay
+  path, and no `choicePoint`.
+- Base: a normal non-final segment omits `finale` and still uses both exits.
+- Bad: resolving an ending from a button press, a UI overlay, or a choice made in
+  the finale.
+
+### 6. Tests Required
+
+- `npm run check:replay` must include the Reunion path and end with
+  `reason="won"` and `resetCount===0`.
+- `npm run check:replay` must separately prove all four endings reachable from
+  authored choice combinations; Reunion itself does not create those branches.
+- Manual play must verify both marks and the sun-window presentation are legible.
+
+### 7. Wrong vs Correct
+
+#### Wrong
+
+```ts
+if (input.jump && state.data.finale !== undefined) {
+  state.status = "won";
+}
+```
+
+#### Correct
+
+```ts
+if (onSolMark && onLunaMark && inWindow) {
+  state.finaleHoldFrames += 1;
+}
+```
 
 ---
 

@@ -2,8 +2,9 @@
 
 > `src/render/renderer.ts`, `src/render/palette.ts`.
 
-> **Status: Plan-derived (pre-implementation).** Source: `plan.md` §7, §10, §13.
-> Reconcile after M1/M5.
+> **Status: Reconcile after M4 (2026-06-24).** Canvas 2D silhouette/glow is
+> live. M4 added consequence-driven core dimming with pre-rendered glow sprites
+> and no per-frame `shadowBlur`.
 
 ---
 
@@ -49,6 +50,90 @@ pass — not before (plan §3 #3, §7).
 - **Colorblind-friendly by construction:** worlds are distinguished by
   **position (top/bottom) and brightness**, not hue alone (plan §9). Don't
   introduce a mechanic readable only by color.
+
+## Core dimming contract (M4)
+
+M4 represents sacrifice as a dimmer glowing core, never as avatar removal or a
+hue-only signal.
+
+### 1. Scope / Trigger
+
+Any renderer/UI change that displays spent light must read
+`JourneyState.consequence` and use brightness/alpha. It must not recalculate
+ending rules or mutate consequence.
+
+### 2. Signatures
+
+```ts
+function renderScene(
+  ctx: CanvasRenderingContext2D,
+  state: SegmentState,
+  camera: CameraState,
+  renderer: Renderer,
+  view: { width: number; height: number; dpr: number },
+  consequence: Consequence,
+): void;
+```
+
+Implementation detail currently owned by `renderer.ts`:
+
+```ts
+const CORE_DIM_FLOOR = 0.18;
+function coreBrightness(light: number): number;
+```
+
+### 3. Contracts
+
+- Sol core brightness reads `consequence.solLight`; Luna core brightness reads
+  `consequence.lunaLight`.
+- `coreBrightness(light)` clamps `light` to `[0,1]` and maps it into
+  `[CORE_DIM_FLOOR, 1]`.
+- The avatar silhouette is always drawn at full silhouette opacity; only the
+  pre-rendered core glow changes alpha.
+- Spent light must remain readable by brightness/alpha and position, not by hue
+  alone.
+- Glow sprites are created up front and composited with `drawImage` plus
+  additive blending. Do not add per-frame `ctx.shadowBlur` for core dimming.
+
+### 4. Validation & Error Matrix
+
+| Condition | Required behavior |
+|-----------|-------------------|
+| `light === 1` | core glow alpha `1` |
+| `light === 0` | core glow alpha `0.18`; silhouette still visible |
+| Light outside `[0,1]` | renderer clamps before mapping |
+| Consequence changes | next render frame reflects brightness only |
+
+### 5. Good/Base/Bad Cases
+
+- Good: `globalAlpha = coreBrightness(consequence.solLight)` while drawing the
+  Sol core sprite.
+- Base: full-light run renders both cores at full alpha.
+- Bad: changing Sol to a different hue to mean "spent" while keeping brightness
+  unchanged.
+
+### 6. Tests Required
+
+- Search touched render files for `shadowBlur` before commit.
+- Manual browser review must confirm dimmed cores remain visible and do not
+  depend on hue-only meaning.
+- `npm run build` must remain green after render changes.
+
+### 7. Wrong vs Correct
+
+#### Wrong
+
+```ts
+ctx.shadowBlur = 32;
+ctx.fillStyle = spent ? "#ff0000" : "#ffb86b";
+```
+
+#### Correct
+
+```ts
+ctx.globalAlpha = coreBrightness(consequence.solLight);
+ctx.drawImage(renderer.solCore, x, y);
+```
 
 ---
 

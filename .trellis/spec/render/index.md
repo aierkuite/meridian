@@ -5,8 +5,9 @@
 > mutates simulation state (see
 > [Directory Structure](../project/directory-structure.md)).
 
-> **Status: Plan-derived (pre-implementation).** Source: `plan.md` §7, §10.
-> Reconcile after M1/M5.
+> **Status: Reconcile after M4 (2026-06-24).** The Canvas 2D silhouette/glow
+> pipeline is live, including consequence-driven core dimming. M5 particles and
+> polish remain future scope.
 
 ---
 

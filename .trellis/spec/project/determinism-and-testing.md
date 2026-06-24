@@ -4,11 +4,11 @@
 > is provably beatable, no softlocks" — rests on the simulation being
 > deterministic. Read this before touching anything under `engine/` or `game/`.
 
-> **Status: Reconcile after M1/M2 (2026-06-22).** The fixed-timestep loop,
-> determinism guard, compact `solutionPaths` schema, and replay solvability
-> harness now exist. The M2 gate is `npm run typecheck`,
-> `npm run check:determinism`, `npm run check:replay`, and `npm run build`.
-> M4 choice-point branch coverage and ending reachability remain future scope.
+> **Status: Reconcile after M4 (2026-06-24).** The fixed-timestep loop,
+> determinism guard, compact `solutionPaths` schema, replay solvability harness,
+> choice-point branch coverage, and ending reachability checks now exist. The
+> green gate is `npm run typecheck`, `npm run check:determinism`,
+> `npm run check:replay`, and `npm run build`.
 
 ---
 
@@ -63,10 +63,10 @@ This is the primary regression test. Do not rely on manual playtest alone
 - The harness expands each `SolutionPath` into fixed-step `InputSnapshot`s,
   forcing `restart=false` and `pause=false`, then replays it on the deterministic loop and
   **asserts both avatars reach their exits with no softlock**.
-- **When M4 choice points land**, it must cover BOTH branches of every choice
-  point (the cruel shortcut and the whole-hearted path) — plan §10, M6.
-- **When M4 endings land**, it also verifies all ~4 endings are reachable from
-  the appropriate accumulated `consequence` states.
+- M4 choice points must cover BOTH branches of every choice point (the cruel
+  shortcut and the whole-hearted path) — plan §10, M6.
+- M4 endings must verify all four ending ids are reachable from authored
+  whole/shortcut combinations.
 - **Run it on every change** to `engine/`, `game/`, or `data/segments/`.
 
 ```ts
@@ -79,11 +79,36 @@ for (const seg of allSegments) {
 }
 ```
 
+### M4 replay extensions
+
+`src/dev/replay.ts` owns reusable checks; `scripts/check-replay.mjs` is the Node
+entrypoint loaded through Vite SSR.
+
+```ts
+function checkBranchCoverage(segments: readonly SegmentData[]): string[];
+function endingReachabilityReport(segments: readonly SegmentData[]): {
+  readonly observed: readonly EndingId[];
+  readonly missing: readonly EndingId[];
+};
+```
+
+Contracts:
+
+- `checkBranchCoverage` fails any `choicePoint` segment missing a `whole` or
+  `shortcut` path.
+- A `whole` path must replay without touching the shortcut zone.
+- A `shortcut` path must replay with `shortcutTriggered === true`.
+- `endingReachabilityReport` enumerates authored choice combinations from a
+  fresh consequence and compares observed ids to `ALL_ENDING_IDS`.
+- The script must print both branch coverage and ending reachability summaries
+  and exit non-zero on any missing coverage.
+
 ## 5. What counts as "tested"
 
 A change to simulation or segment data is **not done** until:
 
 - [ ] The replay harness is green for every segment path; M4 choice segments must cover both branches.
+- [ ] All four ending ids are reachable from authored branch combinations.
 - [ ] A manual softlock pass on any segment whose geometry/elements changed.
 - [ ] No new nondeterminism introduced (grep your diff for the forbidden calls).
 

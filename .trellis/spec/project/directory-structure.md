@@ -3,10 +3,11 @@
 > How Meridian's code is organized, and the one boundary that matters most:
 > **simulation vs. presentation.**
 
-> **Status: Reconcile after M1/M2 (2026-06-22).** The app lives under
-> `meridian/`; M1/M2 filled the gameplay, render, data, UI, and dev tooling
-> spine. `dev/replay.ts` is the headless simulation gate, while
-> `dev/debugOverlay.ts` is a dev-only visual diagnostic overlay.
+> **Status: Reconcile after M4 (2026-06-24).** The app lives under
+> `meridian/`; M1-M4 filled the gameplay, render, data, UI, dev tooling,
+> consequence, narration, finale, and ending spine. `dev/replay.ts` is the
+> headless simulation gate, while `dev/debugOverlay.ts` is a dev-only visual
+> diagnostic overlay.
 
 ---
 
@@ -33,7 +34,7 @@ meridian/
       player.ts              the two linked avatars (Sol & Luna)
       element.ts             base element: subscribe to s -> collision/visual (window bands)
       elements/              ice.ts vine.ts door.ts mote.ts  (stretch: shadow.ts hazard.ts)
-      segment.ts             load data, check win, reset; stores a known solutionPath
+      segment.ts             load data, check win, reset; choice/finale runtime
       narration.ts           beat lines (adaptive to consequence) + graduated hints
       consequence.ts         tracked branch state (light spent at choice points only)
       ending.ts              selects 1 of ~4 endings purely from accumulated consequence
@@ -44,6 +45,7 @@ meridian/
     audio/                   ── PRESENTATION (Web Audio) ──
       audio.ts               music load, sun-driven filter, procedural SFX
     data/                    ── CONTENT ──
+      index.ts               formal M4 journey export
       segments/              segment definitions (TS/JSON) + solutionPath
       story.ts               narration text (English)
     ui/                      ── PRESENTATION (DOM/overlay) ──
