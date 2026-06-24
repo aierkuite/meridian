@@ -140,3 +140,37 @@ Completed M3 finish phase: committed element vocabulary, sun drift model, replay
 ### Next Steps
 
 - None - task complete
+
+
+## Session 5: M4 Content MVP
+
+**Date**: 2026-06-24
+**Task**: M4 Content MVP
+**Branch**: `main`
+
+### Summary
+
+Delivered the formal M4 journey with choice-point consequences, four deterministic endings, Reunion finale, narration/hints, replay coverage, presentation updates, and durable spec contracts.
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `4c9ff28` | (see git log) |
+| `44849ce` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
