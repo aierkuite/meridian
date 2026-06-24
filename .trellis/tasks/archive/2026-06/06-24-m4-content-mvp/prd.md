@@ -72,33 +72,33 @@ of looping mechanic test rooms.
 
 ## Acceptance Criteria
 
-- [ ] AC1. `meridian/src/data/index.ts` exports the formal M4 journey in
+- [x] AC1. `meridian/src/data/index.ts` exports the formal M4 journey in
       intended order, ending with Reunion rather than looping mechanic fixtures
       as the player-facing content.
-- [ ] AC2. Every exported segment has at least one passing `solutionPath`; every
+- [x] AC2. Every exported segment has at least one passing `solutionPath`; every
       choice-point segment has passing `whole` and `shortcut` paths.
-- [ ] AC3. Consequence writes occur only through explicit choice-point shortcut
+- [x] AC3. Consequence writes occur only through explicit choice-point shortcut
       triggers; death, reset, segment timeout, and normal exits do not spend
       light.
-- [ ] AC4. Sol and Luna both remain present and mirror-synced for the entire run;
+- [x] AC4. Sol and Luna both remain present and mirror-synced for the entire run;
       sacrifice is represented as light dimming/state, not avatar removal.
-- [ ] AC5. `resolveEnding(consequence)` is deterministic, pure, and covers
+- [x] AC5. `resolveEnding(consequence)` is deterministic, pure, and covers
       `one-sky`, `vow`, `afterglow`, and `long-dark` exhaustively.
-- [ ] AC6. The Reunion segment is mechanically gated by both solstice marks and
+- [x] AC6. The Reunion segment is mechanically gated by both solstice marks and
       a sun window, then resolves to the already-earned ending with no player
       choice at the end.
-- [ ] AC7. English narration exists for opening, beat progression, choice points,
+- [x] AC7. English narration exists for opening, beat progression, choice points,
       adaptive consequence state, pre-meridian, and all four endings.
-- [ ] AC8. Graduated hints appear only as a stuck-point backstop and never expose
+- [x] AC8. Graduated hints appear only as a stuck-point backstop and never expose
       a skip affordance.
-- [ ] AC9. Ending screens render for all four endings and match the simulation's
+- [x] AC9. Ending screens render for all four endings and match the simulation's
       resolved `ending.id`.
-- [ ] AC10. Core dimming is visible enough to communicate spent light while
+- [x] AC10. Core dimming is visible enough to communicate spent light while
       preserving the silhouette/glow style and avoiding hue-only meaning.
-- [ ] AC11. From `meridian/`, these commands pass: `npm run typecheck`,
+- [x] AC11. From `meridian/`, these commands pass: `npm run typecheck`,
       `npm run check:determinism`, `npm run check:replay`, and
       `npm run build`.
-- [ ] AC12. Replay output or an equivalent deterministic check proves all four
+- [x] AC12. Replay output or an equivalent deterministic check proves all four
       endings are reachable from authored branch combinations or canonical
       consequence states.
 
