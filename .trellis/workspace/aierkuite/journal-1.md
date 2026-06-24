@@ -107,3 +107,36 @@ Finished M2 Core Hardening Phase 3: reconciled M1/M2 specs, committed solution-p
 ### Next Steps
 
 - None - task complete
+
+
+## Session 4: M3 elements and sun drift
+
+**Date**: 2026-06-24
+**Task**: M3 elements and sun drift
+**Branch**: `main`
+
+### Summary
+
+Completed M3 finish phase: committed element vocabulary, sun drift model, replay fixtures, drift spec contract, archived the Trellis task.
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `6bd96c8` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
