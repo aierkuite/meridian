@@ -1,0 +1,6 @@
+{"file": ".trellis/spec/project/determinism-and-testing.md", "reason": "Final replay and determinism regression gate"}
+{"file": ".trellis/spec/project/error-handling-and-perf.md", "reason": "Final frame budget, allocation, logging, and fail-safe review"}
+{"file": ".trellis/spec/audio/audio-guidelines.md", "reason": "Final audio unlock, filter, SFX, and asset/license review"}
+{"file": ".trellis/spec/render/silhouette-glow-pipeline.md", "reason": "Final glow/core/ending atmosphere review"}
+{"file": ".trellis/spec/render/particles.md", "reason": "Final pooled particle review"}
+{"file": ".trellis/spec/ui/ui-guidelines.md", "reason": "Final title/HUD/ending/no-skip UI review"}

@@ -2,9 +2,11 @@
 
 > `src/render/renderer.ts`, `src/render/palette.ts`.
 
-> **Status: Reconcile after M4 (2026-06-24).** Canvas 2D silhouette/glow is
-> live. M4 added consequence-driven core dimming with pre-rendered glow sprites
-> and no per-frame `shadowBlur`.
+> **Status: Reconcile after M5 (2026-06-25).** Canvas 2D silhouette/glow is
+> live. M4 added consequence-driven core dimming; **M5 added richer pre-rendered
+> glow sprites (white-hot core center, sun orb, sharper horizon seam, a cool
+> fungi glow split from the warm mote glow) and pooled particles — still no
+> per-frame `shadowBlur`, and `coreBrightness`/`CORE_DIM_FLOOR=0.18` unchanged.**
 
 ---
 

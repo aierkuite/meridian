@@ -5,9 +5,9 @@
 > mutates simulation state (see
 > [Directory Structure](../project/directory-structure.md)).
 
-> **Status: Reconcile after M4 (2026-06-24).** The Canvas 2D silhouette/glow
-> pipeline is live, including consequence-driven core dimming. M5 particles and
-> polish remain future scope.
+> **Status: Reconcile after M5 (2026-06-25).** The Canvas 2D silhouette/glow
+> pipeline is live, including consequence-driven core dimming. **M5 landed pooled
+> atmospheric particles and glow/palette polish.**
 
 ---
 

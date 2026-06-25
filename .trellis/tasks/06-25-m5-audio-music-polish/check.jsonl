@@ -1,0 +1,3 @@
+{"file": ".trellis/spec/audio/audio-guidelines.md", "reason": "Check unlock, filter, SFX, ending audio, and asset hygiene"}
+{"file": ".trellis/spec/project/determinism-and-testing.md", "reason": "Check replay/determinism unaffected by audio presentation work"}
+{"file": ".trellis/spec/project/error-handling-and-perf.md", "reason": "Check no frame-loop spam or avoidable allocation"}

@@ -2,8 +2,35 @@
 
 > `src/render/particles.ts`.
 
-> **Status: Plan-derived (pre-implementation).** Source: `plan.md` §7, §10, §13.
-> Reconcile after M5.
+> **Status: Implemented (M5, 2026-06-25).** Source: `plan.md` §7, §10, §13.
+> As-built contract below is authoritative.
+
+---
+
+## As-built particle system (M5, `src/render/particles.ts`)
+
+```ts
+export const PARTICLE_VISUAL_STEP = 1 / 60;   // constant visual step (NOT sim DT)
+export interface ParticleSystem {
+  update(step: number, sun: Sun01, cameraX: number): void;
+  drawDay(ctx: CanvasRenderingContext2D): void;     // dust, behind gameplay
+  drawNight(ctx: CanvasRenderingContext2D): void;   // spores, behind gameplay
+  drawHorizon(ctx: CanvasRenderingContext2D): void; // cross-seam motes, top layer
+}
+export function createParticleSystem(): ParticleSystem;
+```
+
+- **Owned by the renderer:** `createRenderer()` builds one `ParticleSystem`;
+  `renderScene` calls `particles.update(PARTICLE_VISUAL_STEP, sun, camera.x)` then
+  `drawDay`/`drawNight` after the sky (background) and `drawHorizon` after the
+  horizon glow (top). The constant step means particles need no `dt` from `main.ts`
+  and never touch replay/determinism.
+- **Fixed caps, preallocated once:** dust 90 / spore 70 / mote 24. Slots are
+  primitive-field objects allocated at construction; `update`/`draw` only mutate
+  in place and reuse dead slots via `respawn` (spawn is a no-op when full).
+- **Visibility tracks `s`:** dust brighter at high sun, spore brighter at low sun,
+  cross-horizon mote peaks at `s ≈ 0.5`. `Math.random` is allowed here (render is
+  not scanned by the determinism guard).
 
 ---
 

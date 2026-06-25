@@ -1,0 +1,8 @@
+{"file": ".trellis/spec/project/directory-structure.md", "reason": "Simulation/presentation boundary for title, audio cue, render, and UI work"}
+{"file": ".trellis/spec/project/typescript-conventions.md", "reason": "Strict TypeScript and closed unions for new audio/render/UI types"}
+{"file": ".trellis/spec/project/determinism-and-testing.md", "reason": "M5 must not leak presentation timing into deterministic replay"}
+{"file": ".trellis/spec/project/error-handling-and-perf.md", "reason": "Performance constraints for glow, particles, and per-frame allocations"}
+{"file": ".trellis/spec/audio/audio-guidelines.md", "reason": "Audio unlock, sun filter, procedural SFX, and music licensing contract"}
+{"file": ".trellis/spec/render/silhouette-glow-pipeline.md", "reason": "Glow pipeline and core dimming constraints"}
+{"file": ".trellis/spec/render/particles.md", "reason": "Pooled dust, spores, and cross-horizon mote particle rules"}
+{"file": ".trellis/spec/ui/ui-guidelines.md", "reason": "Title, HUD, ending screen, and no-skip UI constraints"}

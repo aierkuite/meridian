@@ -1,0 +1,5 @@
+{"file": ".trellis/spec/project/determinism-and-testing.md", "reason": "Check full automated gate and replay integrity"}
+{"file": ".trellis/spec/project/error-handling-and-perf.md", "reason": "Check performance and hot-path constraints"}
+{"file": ".trellis/spec/audio/audio-guidelines.md", "reason": "Check final audio behavior and license hygiene"}
+{"file": ".trellis/spec/render/particles.md", "reason": "Check particles remain pooled and cosmetic"}
+{"file": ".trellis/spec/ui/ui-guidelines.md", "reason": "Check title/endings and no skipped journey affordances"}

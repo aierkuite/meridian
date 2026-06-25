@@ -1,0 +1,31 @@
+{
+  "id": "m5-av-polish",
+  "name": "m5-av-polish",
+  "title": "M5 A/V Polish",
+  "description": "",
+  "status": "planning",
+  "dev_type": null,
+  "scope": null,
+  "package": null,
+  "priority": "P2",
+  "creator": "aierkuite",
+  "assignee": "aierkuite",
+  "createdAt": "2026-06-25",
+  "completedAt": null,
+  "branch": null,
+  "base_branch": "main",
+  "worktree_path": null,
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [
+    "06-25-m5-audio-music-polish",
+    "06-25-m5-particles-render-polish",
+    "06-25-m5-title-ending-ui-polish",
+    "06-25-m5-integration-qa"
+  ],
+  "parent": null,
+  "relatedFiles": [],
+  "notes": "",
+  "meta": {}
+}

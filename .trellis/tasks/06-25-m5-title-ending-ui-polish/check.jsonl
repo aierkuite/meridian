@@ -1,0 +1,2 @@
+{"file": ".trellis/spec/ui/ui-guidelines.md", "reason": "Check title, endings, controls, no level-select, and no skip affordance"}
+{"file": ".trellis/spec/project/determinism-and-testing.md", "reason": "Check replay/determinism unaffected by UI app-shell state"}

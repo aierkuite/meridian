@@ -1,0 +1,4 @@
+{"file": ".trellis/spec/audio/audio-guidelines.md", "reason": "Audio unlock, sun filter, procedural SFX, music/default asset contract"}
+{"file": ".trellis/spec/project/directory-structure.md", "reason": "Keep audio as presentation and replay-free"}
+{"file": ".trellis/spec/project/determinism-and-testing.md", "reason": "Prevent cue derivation or audio timing from entering deterministic simulation"}
+{"file": ".trellis/spec/project/error-handling-and-perf.md", "reason": "Avoid hot-loop logging/allocation and keep frame behavior safe"}

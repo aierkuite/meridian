@@ -2,9 +2,10 @@
 
 > `src/ui/hud.ts`, `src/ui/overlay.ts`.
 
-> **Status: Reconcile after M4 (2026-06-24).** M1/M2 landed the HUD and pause
+> **Status: Reconcile after M5 (2026-06-25).** M1/M2 landed the HUD and pause
 > overlay; M4 landed narration, graduated hints, finale progress, and four
-> ending screens. Title polish remains future scope.
+> ending screens; **M5 landed the title/start flow and per-ending screen
+> atmosphere** (as-built contract below).
 
 ---
 
@@ -52,6 +53,50 @@ One title screen, and **four** ending screens — One Sky / The Vow / The Afterg
 / The Long Dark — each matching the resolved
 [`ending.id`](../engine/segments-flow-and-endings.md) and pairing with its audio
 resolution. All four must be reachable and verified.
+
+### M5 title-flow contract (as-built)
+
+1. **Scope / Trigger.** The app boots into a title screen; the journey must not
+   advance until the player starts.
+
+2. **State ownership.** `AppPhase = "title" | "playing"` lives ONLY in `main.ts`
+   (presentation), never in `game/journey.ts` — so determinism/replay are
+   unaffected. `src/ui/title.ts` exposes `drawTitleScreen(ctx, width, height)`.
+
+3. **Contracts.**
+   - While `appPhase === "title"`, `main.ts` does NOT call `updateJourney` (no sim
+     drift / no consequence or segment writes).
+   - Start gesture = **Space rising edge**. On it: `appPhase = "playing"` and
+     `audio.unlock()` (single idempotent unlock path; the first-key
+     `unlockAudioOnce` listener is the fallback — do not add duplicate unlock).
+   - **Anti-input-leak:** the starting Space press must not become a first-frame
+     jump. Guard with `awaitingStartRelease` — defer the first `updateJourney`
+     until Space releases (gameplay edge-detects `jump && !prevJump`).
+   - Pause is gated to non-terminal play: `Esc` toggles pause only when
+     `journey.status !== "ending"`; the pause overlay draws only when
+     `appPhase === "playing" && paused`.
+   - Ending-screen atmosphere: `drawEndingScreen` switches a per-`EndingId` mood
+     (scrim tint + title color/alpha + optional glow) via an exhaustive switch,
+     while still reading `endingTextFor(ending)`. It never calls `resolveEnding`.
+
+4. **Validation & Error Matrix.**
+
+   | Condition | Required behavior |
+   |-----------|-------------------|
+   | boot | title screen shows; sim does not advance |
+   | Space on title | journey starts + audio unlocks; no first-frame jump |
+   | `Esc` on ending | ignored (no meaningless pause blocking `R`) |
+   | `R` on ending | full journey restart (unchanged) |
+
+5. **Good/Base/Bad.** Good: `if (appPhase === "title") return;` before
+   `updateJourney`. Base: in-journey HUD unchanged. Bad: storing `appPhase` in
+   `journey` / advancing the sim behind the title.
+
+6. **Tests Required.** `npm run check:determinism` + `check:replay` green (title
+   state is presentation-only). Manual: title→start→play→endings flow.
+
+7. **Wrong vs Correct.** Wrong: `updateJourney(...)` runs every frame including
+   title. Correct: title phase early-returns; play begins on Space-release.
 
 ### M4 ending screen contract
 

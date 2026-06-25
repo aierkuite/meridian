@@ -1,0 +1,4 @@
+{"file": ".trellis/spec/render/silhouette-glow-pipeline.md", "reason": "Pre-rendered glow, core dimming, and no runtime shadowBlur constraints"}
+{"file": ".trellis/spec/render/particles.md", "reason": "Pooled dust/spores/cross-horizon particle rules"}
+{"file": ".trellis/spec/project/error-handling-and-perf.md", "reason": "60fps, no hot-path allocation, and render performance discipline"}
+{"file": ".trellis/spec/project/directory-structure.md", "reason": "Keep particles/render as presentation-only"}
