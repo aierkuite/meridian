@@ -3,6 +3,11 @@ meridian/node_modules/
 meridian/dist/
 meridian/.vite/
 
+# 音乐资源（plan §2 #16 / spec audio/audio-guidelines）：
+# 默认环境垫是程序化生成的（meridian/src/audio/audio.ts），不提交任何二进制资源，
+# 仓库保持 clone-and-play。用户本地曲目放在
+# meridian/public/music/local.<ext>（mp3/ogg/m4a/wav）：保持私有、被忽略、可热替换；
+# 存在时经同一太阳滤镜链循环播放，缺失则静默回退到程序化默认垫。
 meridian/public/music/*
 !meridian/public/music/.gitkeep
 

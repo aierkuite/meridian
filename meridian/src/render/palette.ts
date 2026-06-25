@@ -5,21 +5,23 @@ type RGB = readonly [number, number, number];
 const HALF_H = WORLD_H - HORIZON_Y;
 
 // Each pair: [dim, bright] — day brightens with s, night brightens with (1-s).
+// M5 R5：仅微调色相以加强「暖昼 / 冷夜」对比；保持 [dim,bright] 线性结构不变，
+// 故亮度/上下位置仍是世界的首要区分信号（绝不以纯色相表义）。
 const DAY_TOP: readonly [RGB, RGB] = [
-  [70, 55, 90],
-  [200, 154, 82],
+  [60, 52, 96],
+  [214, 162, 90],
 ];
 const DAY_HOR: readonly [RGB, RGB] = [
-  [120, 90, 80],
-  [240, 200, 120],
+  [112, 86, 82],
+  [250, 206, 128],
 ];
 const NIGHT_TOP: readonly [RGB, RGB] = [
-  [27, 41, 80],
-  [70, 55, 120],
+  [22, 36, 78],
+  [78, 62, 130],
 ];
 const NIGHT_BOT: readonly [RGB, RGB] = [
-  [10, 19, 38],
-  [150, 110, 180],
+  [8, 16, 34],
+  [158, 116, 190],
 ];
 
 function lerpRGB(a: RGB, b: RGB, t: number): RGB {

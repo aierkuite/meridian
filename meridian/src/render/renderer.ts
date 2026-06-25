@@ -6,6 +6,7 @@ import type { Element, ElementKind, ElementWorld } from "../game/element";
 import type { SegmentState } from "../game/segment";
 import type { Consequence } from "../game/consequence";
 import { createDaySky, createNightSky } from "./palette";
+import { createParticleSystem, PARTICLE_VISUAL_STEP, type ParticleSystem } from "./particles";
 
 const SILHOUETTE = "#0e1220";
 /** 核心辉光最暗时仍保留的 alpha 地板：耗尽的光是「黯淡余烬」而非「消失」（AC4） */
@@ -29,8 +30,12 @@ export interface Renderer {
   readonly lunaCore: HTMLCanvasElement;
   readonly sunOrb: HTMLCanvasElement;
   readonly horizonGlow: HTMLCanvasElement;
-  /** fungi/mote 共用的预渲染辉光精灵（加性合成用，避免 per-frame shadowBlur） */
+  /** mote 用的暖色预渲染辉光精灵（加性合成用，避免 per-frame shadowBlur） */
   readonly elementGlow: HTMLCanvasElement;
+  /** night 真菌（发光 vine）用的冷紫预渲染辉光精灵，与暖色 mote 区分（R4） */
+  readonly fungiGlow: HTMLCanvasElement;
+  /** 池化装饰粒子系统（dust/spore/mote），renderer 持有、renderScene 内更新+绘制 */
+  readonly particles: ParticleSystem;
 }
 
 function createRadialGlow(radius: number, r: number, g: number, b: number, peak: number): HTMLCanvasElement {
@@ -50,6 +55,69 @@ function createRadialGlow(radius: number, r: number, g: number, b: number, peak:
   return c;
 }
 
+/** 把单通道朝纯白混合 mix（[0,1]）后取整，给核心一个偏白的高光中心 */
+function towardWhite(channel: number, mix: number): number {
+  return Math.round(channel + (255 - channel) * mix);
+}
+
+/**
+ * 预渲染 avatar 核心辉光：保留色相的高光中心 → 本色 → 透明（R4 可读性）
+ *
+ * 相比单色径向渐变，中心朝白混合让被 consequence 调暗到 CORE_DIM_FLOOR 的核心仍
+ * 有清晰亮点，从而在任何亮度下都读得出；色相（sol 暖 / luna 冷）仍保留，配合
+ * 上/下世界位置共同区分两位 avatar——绝不以纯色相表义。半径与旧实现一致（34），
+ * 故 drawAvatar 的居中定位无需改动。
+ *
+ * @param r 核心本色 R
+ * @param g 核心本色 G
+ * @param b 核心本色 B
+ * @returns 预渲染好的核心辉光精灵
+ */
+function createCoreGlow(r: number, g: number, b: number): HTMLCanvasElement {
+  const radius = 34;
+  const size = radius * 2;
+  const c = document.createElement("canvas");
+  c.width = size;
+  c.height = size;
+  const ctx = c.getContext("2d");
+  if (!ctx) {
+    return c;
+  }
+  const grad = ctx.createRadialGradient(radius, radius, 0, radius, radius, radius);
+  grad.addColorStop(0, `rgba(${towardWhite(r, 0.6)},${towardWhite(g, 0.6)},${towardWhite(b, 0.6)},0.98)`);
+  grad.addColorStop(0.32, `rgba(${r},${g},${b},0.85)`);
+  grad.addColorStop(1, `rgba(${r},${g},${b},0)`);
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, size, size);
+  return c;
+}
+
+/**
+ * 预渲染太阳球：白热中心 → 暖金 → 透明（R4，强化 sun orb 的体积感）
+ *
+ * 半径与旧实现一致（64），renderScene 的缩放/定位无需改动。
+ *
+ * @returns 预渲染好的太阳球精灵
+ */
+function createSunOrb(): HTMLCanvasElement {
+  const radius = 64;
+  const size = radius * 2;
+  const c = document.createElement("canvas");
+  c.width = size;
+  c.height = size;
+  const ctx = c.getContext("2d");
+  if (!ctx) {
+    return c;
+  }
+  const grad = ctx.createRadialGradient(radius, radius, 0, radius, radius, radius);
+  grad.addColorStop(0, "rgba(255,252,235,1)");
+  grad.addColorStop(0.32, "rgba(255,233,168,0.85)");
+  grad.addColorStop(1, "rgba(255,233,168,0)");
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, size, size);
+  return c;
+}
+
 function createHorizonGlow(): HTMLCanvasElement {
   const c = document.createElement("canvas");
   c.width = WORLD_W;
@@ -59,8 +127,11 @@ function createHorizonGlow(): HTMLCanvasElement {
     return c;
   }
   const grad = ctx.createLinearGradient(0, 0, 0, 40);
+  // 更锐的高光中心线 + 柔和上下泛光，强化 meridian 接缝（R4）
   grad.addColorStop(0, "rgba(255,243,196,0)");
-  grad.addColorStop(0.5, "rgba(255,243,196,0.9)");
+  grad.addColorStop(0.42, "rgba(255,243,196,0.55)");
+  grad.addColorStop(0.5, "rgba(255,250,224,0.98)");
+  grad.addColorStop(0.58, "rgba(255,243,196,0.55)");
   grad.addColorStop(1, "rgba(255,243,196,0)");
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, WORLD_W, 40);
@@ -73,12 +144,15 @@ export function createRenderer(): Renderer {
     dayDim: createDaySky(0),
     nightLit: createNightSky(1),
     nightDark: createNightSky(0),
-    solCore: createRadialGlow(34, 255, 184, 107, 0.95),
-    lunaCore: createRadialGlow(34, 123, 212, 255, 0.95),
-    sunOrb: createRadialGlow(64, 255, 233, 168, 1),
+    solCore: createCoreGlow(255, 184, 107),
+    lunaCore: createCoreGlow(123, 212, 255),
+    sunOrb: createSunOrb(),
     horizonGlow: createHorizonGlow(),
-    // 小尺寸辉光精灵：drawImage 时按 box 缩放，供 fungi/mote 加性绘制
+    // 暖色小辉光精灵：drawImage 时按 box 缩放，供 mote 加性绘制
     elementGlow: createRadialGlow(48, 255, 220, 160, 0.55),
+    // 冷紫小辉光精灵：供 night 发光真菌加性绘制（与暖色 mote 区分，R4）
+    fungiGlow: createRadialGlow(48, 175, 130, 240, 0.5),
+    particles: createParticleSystem(),
   };
 }
 
@@ -160,9 +234,11 @@ function elementFillFor(kind: ElementKind, world: ElementWorld): string {
 function fillElement(ctx: CanvasRenderingContext2D, e: Element, renderer: Renderer): void {
   ctx.fillStyle = elementFillFor(e.kind, e.world);
   ctx.fillRect(e.box.x, e.box.y, e.box.w, e.box.h);
-  // 为真菌（night vine）与 mote 加性叠一层辉光，强化生物发光观感
-  if ((e.kind === "vine" && e.world === "night") || e.kind === "mote") {
-    const glow = renderer.elementGlow;
+  // 为真菌（night vine）与 mote 加性叠一层辉光，强化生物发光观感。
+  // 真菌用冷紫辉光、mote 用暖色辉光，避免暖光罩在紫色真菌上偏色（R4）。
+  const isFungi = e.kind === "vine" && e.world === "night";
+  if (isFungi || e.kind === "mote") {
+    const glow = isFungi ? renderer.fungiGlow : renderer.elementGlow;
     const cx = e.box.x + e.box.w / 2;
     const cy = e.box.y + e.box.h / 2;
     ctx.globalCompositeOperation = "lighter";
@@ -207,6 +283,13 @@ export function renderScene(
   ctx.drawImage(renderer.nightLit, 0, HORIZON_Y);
   ctx.globalAlpha = 1;
 
+  // 装饰粒子：用固定视觉步长自更新（design.md §4 选项 B，无需从 main.ts 透传 dt）。
+  // day/night 两层绘于天空之上、gameplay 轮廓之下，使尘埃/孢子位于背景而绝不遮挡
+  // 地形/元素/avatar；跨缝 mote 留到接缝辉光之后再绘（见末尾），强化 meridian。
+  renderer.particles.update(PARTICLE_VISUAL_STEP, s, camera.x);
+  renderer.particles.drawDay(ctx);
+  renderer.particles.drawNight(ctx);
+
   ctx.fillStyle = SILHOUETTE;
   for (const t of state.data.dayTerrain) {
     ctx.fillRect(t.x, t.y, t.w, t.h);
@@ -246,6 +329,10 @@ export function renderScene(
   ctx.drawImage(renderer.sunOrb, orbX - orbSize / 2, orbY - orbSize / 2, orbSize, orbSize);
   ctx.globalAlpha = 1;
   ctx.globalCompositeOperation = "source-over";
+
+  // 跨缝 mote 置于接缝辉光与太阳球之后（最上层），稀疏且加性，强化 meridian
+  // 而不遮挡 gameplay；drawHorizon 内部自行复位 globalAlpha 与合成模式。
+  renderer.particles.drawHorizon(ctx);
 
   ctx.restore();
 }

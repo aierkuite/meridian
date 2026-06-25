@@ -134,6 +134,49 @@ export function drawHud(
 }
 
 /**
+ * 单个结局的画面氛围（M5 R5/AC5）：幕色 + 标题色/亮度 + 可选泛光
+ *
+ * 仅承载「取色/亮度」，绝不重算结局规则。明亮结局（one-sky/vow）暖而亮，
+ * 悲剧结局（afterglow/long-dark）冷暗、标题更黯，使四结局一眼可辨。
+ */
+interface EndingMood {
+  /** 全屏深色幕（带情绪色温） */
+  readonly scrim: string;
+  /** 标题填色 */
+  readonly title: string;
+  /** 标题透明度（越黯淡的结局越低） */
+  readonly titleAlpha: number;
+  /** 可选氛围泛光色（加性径向光）；null 表示不绘 */
+  readonly glow: string | null;
+}
+
+/**
+ * 由结局 id 选取画面氛围（闭合 switch，新增结局时编译器强制补齐分支）
+ *
+ * 结局 id 由 journey.resolvedEnding 给出，本函数只做表现层取色，绝不调用
+ * resolveEnding，也不改动任何 gameplay 状态。
+ *
+ * @param ending 已解析的结局 id
+ * @returns 该结局的画面氛围
+ */
+function endingMoodFor(ending: EndingId): EndingMood {
+  switch (ending) {
+    case "one-sky":
+      // 圆满：暖金满溢的高光
+      return { scrim: "rgba(18,12,4,0.74)", title: "#ffe9a8", titleAlpha: 1, glow: "rgba(255,210,120,0.16)" };
+    case "vow":
+      // 苦乐参半：暖冷平衡的柔白
+      return { scrim: "rgba(8,10,20,0.82)", title: "#dfe7ff", titleAlpha: 0.96, glow: "rgba(160,180,255,0.10)" };
+    case "afterglow":
+      // 不均的遗憾：偏暖而黯
+      return { scrim: "rgba(16,9,6,0.86)", title: "#e6b486", titleAlpha: 0.9, glow: "rgba(230,150,90,0.08)" };
+    case "long-dark":
+      // 挥霍后的黯淡：冷而近黑，标题最黯
+      return { scrim: "rgba(2,4,10,0.92)", title: "#90a4c8", titleAlpha: 0.82, glow: null };
+  }
+}
+
+/**
  * 绘制结局屏（AC9）：四种结局唯一的全屏终态 UI
  *
  * 由 journey.resolvedEnding 驱动、经 narration.endingTextFor 取标题/收束句；表现层
@@ -152,14 +195,28 @@ export function drawEndingScreen(
   ending: EndingId,
 ): void {
   const text = endingTextFor(ending);
+  const mood = endingMoodFor(ending);
   const cx = width / 2;
 
   ctx.save();
-  // 深色幕：盖住定格的终章画面，让结局文本读得清
-  ctx.fillStyle = "rgba(4,5,12,0.82)";
+  // 深色幕（带结局情绪色温）：盖住定格的终章画面，让结局文本读得清
+  ctx.fillStyle = mood.scrim;
   ctx.fillRect(0, 0, width, height);
 
-  drawCenteredLine(ctx, text.title, cx, height / 2 - 28, "300 44px system-ui, sans-serif", NARRATION_COLOR);
+  // 可选氛围泛光：自标题区向外的柔和径向光，加性叠加，强化结局情绪而不抢文本
+  if (mood.glow !== null) {
+    const radius = Math.max(width, height) * 0.5;
+    const gy = height / 2 - 10;
+    const grad = ctx.createRadialGradient(cx, gy, 0, cx, gy, radius);
+    grad.addColorStop(0, mood.glow);
+    grad.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.globalCompositeOperation = "lighter";
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, width, height);
+    ctx.globalCompositeOperation = "source-over";
+  }
+
+  drawCenteredLine(ctx, text.title, cx, height / 2 - 28, "300 44px system-ui, sans-serif", mood.title, mood.titleAlpha);
   drawCenteredLine(ctx, text.closer, cx, height / 2 + 24, "300 20px system-ui, sans-serif", QUIET_COLOR, 0.9);
   drawCenteredLine(ctx, "Press R to begin again.", cx, height - 56, "300 15px system-ui, sans-serif", QUIET_COLOR, 0.65);
   ctx.restore();
