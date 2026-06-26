@@ -1,0 +1,11 @@
+{"file": "plan.md", "reason": "Source milestone definition for M6 and MVP acceptance"}
+{"file": ".trellis/spec/project/determinism-and-testing.md", "reason": "Replay, branch coverage, ending reachability, and determinism contracts"}
+{"file": ".trellis/spec/project/error-handling-and-perf.md", "reason": "Softlock handling, frame budget, allocation, logging, and fail-safe rules"}
+{"file": ".trellis/spec/data/segment-data-format.md", "reason": "Segment solutionPath and choice-point branch coverage contract"}
+{"file": ".trellis/spec/data/narration-text.md", "reason": "Graduated hint and English narration requirements"}
+{"file": ".trellis/spec/engine/segments-flow-and-endings.md", "reason": "Consequence write rules, ending resolver contract, reset/restart behavior"}
+{"file": ".trellis/spec/audio/audio-guidelines.md", "reason": "Audio unlock, cue frame, sun filter, procedural SFX, and asset fallback contract"}
+{"file": ".trellis/spec/render/silhouette-glow-pipeline.md", "reason": "Core dimming, glow, and no per-frame shadowBlur contract"}
+{"file": ".trellis/spec/render/particles.md", "reason": "Pooled particle and cosmetic-only render contract"}
+{"file": ".trellis/spec/ui/ui-guidelines.md", "reason": "Title, HUD, pause/reset, hints, and ending screen contracts"}
+{"file": ".trellis/tasks/archive/2026-06/06-25-m5-integration-qa/prd.md", "reason": "Prior integrated QA scope and browser/audio/render/UI coverage"}

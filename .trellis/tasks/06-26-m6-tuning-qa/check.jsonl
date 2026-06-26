@@ -1,0 +1,10 @@
+{"file": "plan.md", "reason": "Check M6 completion against the project plan and MVP freeze line"}
+{"file": ".trellis/spec/project/determinism-and-testing.md", "reason": "Check automated gate, replay integrity, branch coverage, and ending reachability"}
+{"file": ".trellis/spec/project/error-handling-and-perf.md", "reason": "Check softlock, performance, allocation, logging, and recovery constraints"}
+{"file": ".trellis/spec/data/segment-data-format.md", "reason": "Check solutionPath and choice-point data integrity"}
+{"file": ".trellis/spec/data/narration-text.md", "reason": "Check graduated hints and player-facing prose constraints"}
+{"file": ".trellis/spec/engine/segments-flow-and-endings.md", "reason": "Check consequence, ending, reset, and finale behavior"}
+{"file": ".trellis/spec/audio/audio-guidelines.md", "reason": "Check audio unlock, cues, filter, SFX, and local-track hygiene"}
+{"file": ".trellis/spec/render/silhouette-glow-pipeline.md", "reason": "Check glow/core dimming and frame-hot-path render constraints"}
+{"file": ".trellis/spec/render/particles.md", "reason": "Check particle pooling and cosmetic-only behavior"}
+{"file": ".trellis/spec/ui/ui-guidelines.md", "reason": "Check title/HUD/endings/no-skip UI behavior"}

@@ -139,6 +139,51 @@ ctx.drawImage(renderer.solCore, x, y);
 
 ---
 
+## Exit reached latch feedback (M6)
+
+Some authored segments let one avatar reach its exit before the other. The
+simulation latches that side with `SegmentState.solReached` /
+`SegmentState.lunaReached`; render must make the latched side persistently
+visible until the segment wins or resets.
+
+### Convention: persistent reached-state exit feedback
+
+**What**: Draw unreached exits as low-alpha guide zones. Once a side's reached
+latch is true, draw that exit with a stronger fill and visible outline.
+
+**Why**: Offset exit segments such as `interlude-ice-echo` can otherwise look
+broken after one side is already satisfied. Persistent feedback tells the player
+to solve the other side without implying a new gameplay rule.
+
+**Example**:
+
+```ts
+ctx.fillStyle = state.solReached ? EXIT_SOL_DONE : EXIT_SOL;
+ctx.fillRect(sol.x, sol.y, sol.w, sol.h);
+if (state.solReached) {
+  ctx.strokeRect(sol.x, sol.y, sol.w, sol.h);
+}
+```
+
+**Contracts**:
+
+- Renderer reads only `state.solReached` / `state.lunaReached`; it never writes
+  latch state or decides the segment win condition.
+- Reached feedback must persist for the latched side until normal segment win or
+  reset clears the simulation state.
+- Feedback uses brightness/opacity and outline shape, not hue alone.
+- Do not add per-frame `ctx.shadowBlur`, new canvases, or allocations for this
+  feedback; simple fills/strokes or prebuilt sprites are the expected path.
+
+**Validation**:
+
+- Manual review an offset-exit segment and confirm one side remains visibly
+  satisfied while the other side is still being solved.
+- `npm run typecheck`, `npm run check:determinism`, `npm run check:replay`, and
+  `npm run build` must remain green because this is presentation-only.
+
+---
+
 ## Forbidden
 
 - ❌ Per-frame `ctx.shadowBlur` on moving/repeated objects.

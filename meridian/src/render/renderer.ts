@@ -20,6 +20,12 @@ const GATE_NIGHT_FILL = "rgba(123,160,255,0.65)";
 const MOTE_FILL = "#ffe6a8";
 const EXIT_SOL = "rgba(255,184,107,0.30)";
 const EXIT_LUNA = "rgba(123,212,255,0.30)";
+// 已抵达（reached 锁存）后的「已满足」样式：实心填充 + 亮描边，让错位出口段
+// （如 interlude-ice-echo）的两相解法可读，一侧锁存后永久标记，玩家据此转去解另一侧
+const EXIT_SOL_DONE = "rgba(255,184,107,0.85)";
+const EXIT_LUNA_DONE = "rgba(123,212,255,0.85)";
+const EXIT_SOL_BORDER = "rgba(255,212,160,0.95)";
+const EXIT_LUNA_BORDER = "rgba(190,234,255,0.95)";
 
 export interface Renderer {
   readonly dayBright: HTMLCanvasElement;
@@ -298,10 +304,24 @@ export function renderScene(
     ctx.fillRect(t.x, t.y, t.w, t.h);
   }
 
-  ctx.fillStyle = EXIT_SOL;
-  ctx.fillRect(state.data.exits.sol.x, state.data.exits.sol.y, state.data.exits.sol.w, state.data.exits.sol.h);
-  ctx.fillStyle = EXIT_LUNA;
-  ctx.fillRect(state.data.exits.luna.x, state.data.exits.luna.y, state.data.exits.luna.w, state.data.exits.luna.h);
+  // 出口：未抵达时画淡色提示区；reached 锁存后画「已满足」实心 + 亮描边
+  // 读取 sim 的 solReached/lunaReached（只读），不引入逐帧 shadowBlur/分配
+  const sol = state.data.exits.sol;
+  ctx.fillStyle = state.solReached ? EXIT_SOL_DONE : EXIT_SOL;
+  ctx.fillRect(sol.x, sol.y, sol.w, sol.h);
+  if (state.solReached) {
+    ctx.strokeStyle = EXIT_SOL_BORDER;
+    ctx.lineWidth = 2;
+    ctx.strokeRect(sol.x, sol.y, sol.w, sol.h);
+  }
+  const luna = state.data.exits.luna;
+  ctx.fillStyle = state.lunaReached ? EXIT_LUNA_DONE : EXIT_LUNA;
+  ctx.fillRect(luna.x, luna.y, luna.w, luna.h);
+  if (state.lunaReached) {
+    ctx.strokeStyle = EXIT_LUNA_BORDER;
+    ctx.lineWidth = 2;
+    ctx.strokeRect(luna.x, luna.y, luna.w, luna.h);
+  }
 
   for (const e of state.elements) {
     const alpha = e.visualAt(s).alpha;
