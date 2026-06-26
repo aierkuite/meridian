@@ -227,3 +227,37 @@ scope unchanged.
 ### Next Steps
 
 - None - task complete
+
+
+## Session 7: M7 open-source polish and MVP freeze
+
+**Date**: 2026-06-27
+**Task**: M7 open-source polish and MVP freeze
+**Branch**: `main`
+
+### Summary
+
+Completed M7 release packaging: public README, real gameplay media, MIT/procedural audio notes, Pages deployment verification, and MVP freeze marker.
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `dc071ed` | (see git log) |
+| `40087c7` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
