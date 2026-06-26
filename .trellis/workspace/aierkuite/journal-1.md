@@ -241,7 +241,15 @@ Completed M7 release packaging: public README, real gameplay media, MIT/procedur
 
 ### Main Changes
 
-(Add details)
+- Rewrote the root `README.md` for public open-source release with hook, live
+  demo link, gameplay concept, controls, run/build commands, quality gates,
+  procedural audio/license notes, credits, and MIT/license clarity.
+- Added real production-build gameplay media under `docs/media/`:
+  `hero.png`, `gameplay.gif`, `sun-high.png`, and `title.png`.
+- Confirmed M7 introduced no new durable code contract; `.trellis/spec/`
+  update was a no-op.
+- Marked `plan.md` §12 as frozen after M7 open-source polish.
+- Archived `.trellis/tasks/06-26-m7-open-source-polish`.
 
 ### Git Commits
 
@@ -252,7 +260,18 @@ Completed M7 release packaging: public README, real gameplay media, MIT/procedur
 
 ### Testing
 
-- [OK] (Add test results)
+- [OK] Phase 2 release gates had already passed before commit:
+  `npm.cmd run typecheck`, `npm.cmd run check:determinism`,
+  `npm.cmd run check:replay`, and `npm.cmd run build`.
+- [OK] GitHub Pages workflow succeeded for M7 media/README commit
+  `dc071ed` and final closeout head `a46f55c`.
+- [OK] HTTP verification through proxy returned `200 OK` for
+  `https://aierkuite.github.io/meridian/`, its deployed Vite JS asset, the
+  raw `README.md`, and all four committed media files.
+- [LIMIT] In-app browser verification was not repeated because opening the
+  Pages URL through Codex's browser path repeatedly caused Codex to exit. AC9
+  is therefore covered by GitHub Actions deployment status plus direct HTTP
+  resource verification.
 
 ### Status
 
