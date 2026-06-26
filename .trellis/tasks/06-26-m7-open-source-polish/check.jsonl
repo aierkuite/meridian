@@ -1,0 +1,7 @@
+{"file": ".trellis/spec/project/index.md", "reason": "Check public docs and release changes against locked project-wide decisions."}
+{"file": ".trellis/spec/project/directory-structure.md", "reason": "Check docs/media paths, music asset handling, and package layout hygiene."}
+{"file": ".trellis/spec/project/determinism-and-testing.md", "reason": "Check that final release gates include typecheck, determinism, replay, and build."}
+{"file": ".trellis/spec/project/error-handling-and-perf.md", "reason": "Check release polish does not introduce performance/logging regressions."}
+{"file": ".trellis/spec/audio/audio-guidelines.md", "reason": "Check default audio/local track documentation and license notes against M5 contract."}
+{"file": ".trellis/spec/render/index.md", "reason": "Check README media reflects the actual procedural silhouette/glow visual identity."}
+{"file": ".trellis/spec/ui/index.md", "reason": "Check controls and UI descriptions in README/media match the shipped UI."}

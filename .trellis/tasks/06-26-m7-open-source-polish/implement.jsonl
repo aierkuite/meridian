@@ -1,0 +1,8 @@
+{"file": ".trellis/spec/project/index.md", "reason": "Project-wide locked decisions: TypeScript/Vite app, English public text, MIT/open-source delivery, GitHub Pages demo."}
+{"file": ".trellis/spec/project/directory-structure.md", "reason": "Repository layout, root documentation expectations, public music path, and simulation/presentation boundaries."}
+{"file": ".trellis/spec/project/determinism-and-testing.md", "reason": "Release validation commands and replay/ending reachability gate that must stay green for MVP freeze."}
+{"file": ".trellis/spec/project/error-handling-and-perf.md", "reason": "Release-quality guardrails for performance, loop logging, and production robustness."}
+{"file": ".trellis/spec/audio/index.md", "reason": "As-built audio scope for procedural default bed, sun-driven filter, procedural SFX, and local track behavior."}
+{"file": ".trellis/spec/audio/audio-guidelines.md", "reason": "Authoritative M5 licensing and local music hygiene decision for default procedural audio."}
+{"file": ".trellis/spec/render/index.md", "reason": "Visual identity and asset constraints for actual-game release screenshots/GIF."}
+{"file": ".trellis/spec/ui/index.md", "reason": "Controls, title, HUD, pause/reset, and ending UI details README/media should represent accurately."}
