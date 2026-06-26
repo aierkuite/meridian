@@ -8,8 +8,8 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 5
-- **Last Active**: 2026-06-24
+- **Total Sessions**: 6
+- **Last Active**: 2026-06-26
 <!-- @@@/auto:current-status -->
 
 ---
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~176 | Active |
+| `journal-1.md` | ~229 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 6 | 2026-06-26 | M6 Tuning and QA | `8db8404` | `main` |
 | 5 | 2026-06-24 | M4 Content MVP | `4c9ff28`, `44849ce` | `main` |
 | 4 | 2026-06-24 | M3 elements and sun drift | `6bd96c8` | `main` |
 | 3 | 2026-06-22 | M2 Core Hardening Finish | `f459f2f`, `ae9b2db` | `main` |

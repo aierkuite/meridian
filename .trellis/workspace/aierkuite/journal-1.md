@@ -174,3 +174,56 @@ Delivered the formal M4 journey with choice-point consequences, four determinist
 ### Next Steps
 
 - None - task complete
+
+
+## Session 6: M6 Tuning and QA
+
+**Date**: 2026-06-26
+**Task**: M6 Tuning and QA
+**Branch**: `main`
+
+### Summary
+
+Completed M6 finish closeout after Phase 2 tuning and manual QA. Added a narrow
+presentation-only readability fix for offset exit latch feedback, recorded the
+new render contract, committed the M6 task artifacts, and kept the MVP freeze
+scope unchanged.
+
+### Main Changes
+
+- Added persistent reached-exit visual feedback in `meridian/src/render/renderer.ts`
+  by reading `SegmentState.solReached` / `lunaReached` and drawing the latched
+  exit with stronger fill plus outline.
+- Documented the M6 exit latch feedback contract in
+  `.trellis/spec/render/silhouette-glow-pipeline.md`.
+- Included M6 task artifacts and Trellis metadata/version updates in the work
+  commit.
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `8db8404` | feat(m6): exit-reached latch feedback + tuning/QA closeout |
+
+### Testing
+
+- [OK] `npm.cmd run typecheck`
+- [OK] `npm.cmd run check:determinism` — determinism guard passed, 19 files scanned.
+- [OK] `npm.cmd run check:replay` — 13 paths won, zero resets, all choice points
+  covered `whole` + `shortcut`, and endings reachable: `one-sky`, `vow`,
+  `afterglow`, `long-dark`.
+- [OK] `npm.cmd run build` — production Vite build succeeded.
+- [OK] Static QA confirmed AC5 hints, AC6 consequence write scope and ending
+  mapping, AC7 performance hot-path constraints, and AC10 scope discipline.
+- [OK] Manual browser QA completed by the user before handoff: AC3 softlock
+  pass, AC4 difficulty/readability feel, AC8 Chrome/Firefox, and AC9 audio/UI.
+- [LIMIT] Safari remains an external QA limitation in this Windows environment,
+  as allowed by the M6 PRD when no Apple-platform target is available.
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
