@@ -283,6 +283,9 @@ meridian/
 
 ## 12. MVP Freeze Line
 
+**Status:** MVP frozen after M7 open-source polish on 2026-06-27; stretch work
+must start only from new post-freeze tasks.
+
 **MVP (must ship — a complete, theme-strong, emotionally landed game):**
 - Engine: mirror-sync movement + sun dial (holding) **+ drift zones / hold-steady**.
 - Elements 1–4 (ice, vine/fungi, door/gate, **balance mote / window-value**).
